@@ -137,7 +137,7 @@ LogicalFilter filter = Restrictions.between("price", 10, 50);
 filter = filter.and(Restrictions.like("name", "%jpa%"));
 filter = filter.and(Restrictions.eq("orignal", "Sydney"));
 ```
-**Example Code: **
+**Example Code:**
 ``` java
 		LogicalFilter filter = Restrictions.gt("price", 50);
 		productDao.query().filter(filter).selectThis().list().forEach(pro -> {
@@ -146,7 +146,7 @@ filter = filter.and(Restrictions.eq("orignal", "Sydney"));
 // Hibernate: select product0_.id as id1_1_, product0_.name as name2_1_, product0_.origin as origin3_1_, product0_.price as price4_1_ from demo_product product0_ where product0_.price>50.0
 ```
 #### Group Statement
-**Example Code: **
+**Example Code:**
 
 ``` java
 productDao.multiquery().groupBy("origin").select(Column.forName("origin"), Fields.count(Fields.toInteger(1)).as("count")).list().forEach(t -> {
@@ -156,7 +156,7 @@ productDao.multiquery().groupBy("origin").select(Column.forName("origin"), Field
 
 ```
 #### Order Statement
-**Example Code: **
+**Example Code:**
 ``` java
 orderDao.query().filter(Restrictions.gte("price", 50)).sort(JpaSort.desc("createTime"), JpaSort.asc("price")).selectThis().list(10).forEach(pro -> {
 					System.out.println(pro);
@@ -165,7 +165,7 @@ orderDao.query().filter(Restrictions.gte("price", 50)).sort(JpaSort.desc("create
 ```
 
 #### Join Statement
-**Left Join Example Code: **
+**Left Join Example Code:**
 ``` java
 PageResponse<Tuple> pageResponse = orderDao.multiselect().leftJoin("product", "p")
 	.filter(Restrictions.gte("p", "price", 50)).sort(JpaSort.desc("createTime")).selectAlias("p")
@@ -179,7 +179,7 @@ PageResponse<Tuple> pageResponse = orderDao.multiselect().leftJoin("product", "p
 // Hibernate: select product1_.id as id1_1_, product1_.name as name2_1_, product1_.origin as origin3_1_, product1_.price as price4_1_ from demo_order order0_ left outer join demo_product product1_ on order0_.product_id=product1_.id where product1_.price>=50.0 order by order0_.create_time desc limit ?, ?
 ```
 
-**Inner Join Example Code: **
+**Inner Join Example Code:**
 ``` java
 		ColumnList columnList = new ColumnList();
 		columnList.addColumn("id");
@@ -200,7 +200,7 @@ PageResponse<Tuple> pageResponse = orderDao.multiselect().leftJoin("product", "p
 ```
 
 #### Function Statement
-**Aggregation Function Example Code: **
+**Aggregation Function Example Code:**
 ``` java
 ColumnList columnList = new ColumnList()
 				.addColumn(Fields.max("price", BigDecimal.class), "maxPrice")
@@ -212,7 +212,7 @@ productDao.multiquery().groupBy("origin").select(columnList).setTransformer(Tran
 	System.out.println(vo);
 });
 ```
-**Other Function Example Code: **
+**Other Function Example Code:**
 ``` java
 ColumnList columnList = new ColumnList()
        .addColumn(Function.build("LOWER", String.class, "name"), "name")
@@ -223,7 +223,7 @@ productDao.multiquery().select(columnList).list(10).forEach(t -> {
 // Hibernate: select lower(product0_.name) as col_0_0_, upper(product0_.origin) as col_1_0_ from demo_product product0_ limit ?
 ```
 
-**Case When Example Code: **
+**Case When Example Code:**
 
 ``` java
 IfExpression<String, String> ifExpression = new IfExpression<String, String>(Property.forName("origin", String.class));
