@@ -1,257 +1,872 @@
-###  <code>Fastjpa</code>, a simple and quick development tools of JPA
-It provides a secondary encapsulation of JPA in the <code>SpringBoot</code> framework, provides an object-oriented way to operate JQL/HQL, aims to reduce the writing of <code>sql</code> statements, quickly improve development efficiency, make code writing more elegant and increase readability
 
-<code>fastjpa-spring-boot-starter</code> relies on <code>spring-boot-starter-data-jpa</code>, which essentially repackages the JPA Criteria query API (QBC) and is designed as a stream style API (somewhat similar to python's <code>orm framework Sqlalchemy</code>) , Making the JPA object-oriented query API no longer difficult to use
 
-### Install
+# EasyJPA – Your Best Partner for JPA Development!
+
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3+-brightgreen?style=for-the-badge&logo=springboot)
+![Hibernate](https://img.shields.io/badge/Hibernate-ORM-yellow?style=for-the-badge&logo=hibernate)
+![JPA](https://img.shields.io/badge/JPA-Jakarta%20Persistence%20API-blue?style=for-the-badge)
+![EasyJPA](https://img.shields.io/badge/EasyJPA-Lightweight-blueviolet?style=for-the-badge)
+
+
+### It's time to say goodbye to JPA Criteria API complexity! EasyJPA makes your code sleek, simple, and powerful!
+
+**EasyJPA** elegantly streamlines JPA's Criteria API with a fully **Lambda-expression-based** and developer-friendly API, making dynamic queries both intuitive and efficient. It significantly reduces SQL/JPQL complexity, accelerates development, and improves code readability, ensuring a clean and concise query experience.
+
+With comprehensive support for complex SQL queries, **EasyJPA** enables seamless execution of **multi-table joins (INNER, LEFT, RIGHT, CROSS JOINs), subqueries, aggregations, computed columns, and filtering operations**. Its **fluent API with full Lambda expression support** allows developers to construct queries programmatically, eliminating the need for raw SQL while retaining maximum flexibility.
+
+## Features
+---------------------------
+* Dynamic Queries
+* Computed and Function-Based Columns
+* Grouping and Filtering
+* Sorting
+* List Queries and Pagination
+* Complex Subqueries
+* Inner Join, Left Join, Right Join, and Cross Join
+* Update and Delete Operations
+* Lambda Expression Support
+* Hibernate Implementation by Default
+
+## Examples
+**1. Query All Users**
+
+```java
+@Autowired
+private UserDao userDao;
+
+@BeforeAll
+public void saveRandomUsers() {
+    List.of(new User("Jack", "123456", "Jack001@jpatest.com"),
+            new User("Petter", "123456", "Petter002@jpatest.com"),
+            new User("Scott", "123456", "scott003@jpatest.com"),
+            new User("Lee", "123456", "lee004@jpatest.com"),
+            new User("Terry", "123456", "terry005@jpatest.com")
+           ).forEach(user -> {
+                userDao.save(user);
+           });
+    log.info("Total users: {}", userDao.count());
+}
+
+/**
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.email,
+        u1_0.password,
+        u1_0.username 
+    from
+        example_user u1_0
+**/
+@Test
+public void testSelectAll() {
+    userDao.query()
+           .selectThis()
+           .list()
+           .forEach(u -> {
+                log.info(u.toString());
+           });
+}
+```
+
+**2. Basic Search Conditions**
+
+``` java
+/**
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.email,
+        u1_0.password,
+        u1_0.username 
+    from
+        example_user u1_0 
+    where
+        u1_0.username=? 
+        and u1_0.password=?
+**/
+@Test
+public void testGetUserByUsernameAndPassword() {
+    User user = userDao.query().filter(new FilterList()
+                                          .eq(User::getUsername, "Jack")
+                                          .eq(User::getPassword, "123456")
+                                       ).selectThis()
+                                       .one();
+    log.info("Load user: {}", user);
+    assertTrue(user != null);
+}
+
+/**
+Hibernate: 
+    select
+        u1_0.username,
+        u1_0.password 
+    from
+        example_user u1_0 
+    where
+        u1_0.email like ? escape '' 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+**/
+@ParameterizedTest
+@ValueSource(strings = {"scott003", "lee004"})
+public void testGetUserByEmail(String email) {
+    User user = userDao.query()
+                       .filter(new FilterList()
+                                  .like(User::getEmail, email)
+                       ).select(new ColumnList(
+                                   User::getUsername, 
+                                   User::getPassword)
+                       ).first();
+    log.info("Load user: {}", user);
+    assertTrue(user != null);
+    
+}
+
+/**
+Hibernate: 
+    select
+        u1_0.username,
+        u1_0.password 
+    from
+        example_user u1_0 
+    where
+        u1_0.email like ? escape '' 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+**/
+@ParameterizedTest
+@ValueSource(strings = {"abc009"})
+public void testGetUserNotFoundByEmail(String email) {
+    User user = userDao.query()
+                       .filter(new FilterList()
+                               .like(User::getEmail, email)
+                       ).select(new ColumnList(
+                                    User::getUsername, 
+                                    User::getPassword, 
+                                    User::getEmail)
+                       ).first();
+   log.info("Load user: {}", user);
+   assertTrue(user == null);
+}
+
+```
+**3. Nested Query Conditions & Sorting & Computed Columns**
+
+``` java
+@Autowired
+private ProductDao productDao;
+
+/**
+Hibernate: 
+    select
+        p1_0.name,
+        p1_0.location,
+        p1_0.price,
+        (p1_0.price*p1_0.discount) 
+    from
+        example_product p1_0 
+    where
+        p1_0.price>=? 
+        and (
+            p1_0.location=? 
+            or p1_0.location=?
+        ) 
+    order by
+        4 desc
+ **/
+@Test
+public void test2() {
+    productDao.query(ProductVo.class)
+              .filter(new FilterList()
+                          .gte(Product::getPrice, BigDecimal.valueOf(200))
+                              .and(() -> new FilterList()
+                                         .eq(Product::getLocation, "Australia")
+                                             .or()
+                                         .eq(Product::getLocation, "Thailand")
+                               )
+              ).sort(JpaSort.desc(Fields.toInteger(4))
+              ).select(new ColumnList(
+                            Product::getName, 
+                            Product::getLocation, 
+                            Product::getPrice
+                       ).addColumns(
+                            Fields.multiply(Product::getPrice, Product::getDiscount).as("actualPrice"))
+                       ).list().forEach(vo -> {
+                            log.info(vo.toString());
+                       });
+}
+```
+
+**4. Grouping & Aggregation & Filtering**
+
+```java
+/**
+Hibernate: 
+    select
+        p1_0.location,
+        max(p1_0.price),
+        min(p1_0.price),
+        avg(p1_0.price),
+        count(1) 
+    from
+        example_product p1_0 
+    group by
+        p1_0.location 
+    having
+        avg(p1_0.price)>? 
+    order by
+        4 desc 
+    offset
+        ? rows
+**/
+@Test
+public void test4() {
+    productDao.customQuery()
+              .groupBy(new FieldList(Product::getLocation))
+              .having(Restrictions.gt(Fields.avg(Product::getPrice), 50d))
+              .sort(JpaSort.desc(4))
+              .select(new ColumnList(Product::getLocation).addColumns(
+                   Fields.max(Product::getPrice).as("maxPrice"),
+                   Fields.min(Product::getPrice).as("minPrice"),
+                   Fields.avg(Product::getPrice).as("avgPrice"), 
+                   Fields.count(1).as("amount"))
+               ).setTransformer(Transformers.asBean(ProductAggregationVo.class))
+               .list().forEach(vo -> {
+                    log.info(vo.toString());
+               });
+}
+```
+**5. Using Function in Columns**
+
+```java
+/**
+Hibernate: 
+    select
+        ((max(p1_0.price)||?)||min(p1_0.price)),
+        p1_0.location 
+    from
+        example_product p1_0 
+    group by
+        p1_0.location 
+    offset
+        ? rows
+**/
+@Test
+public void test5() {
+    productDao.customQuery()
+              .groupBy("location")
+              .select(new ColumnList().addColumns(
+                          Fields.concat(Fields.concat(Fields.max("price", String.class), "/"),
+                                        Fields.min("price", String.class)).as("repr")
+                          ).addColumns(Product::getLocation))
+              .setTransformer(Transformers.asBean(ProductAggregationVo.class))
+              .list().forEach(vo -> {
+                  log.info(vo.toString());
+              });
+}
+
+/**
+Hibernate: 
+    select
+        lower(p1_0.name),
+        upper(p1_0.location) 
+    from
+        example_product p1_0 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+**/
+@Test
+public void test6() {
+    productDao.customQuery()
+              .select(new ColumnList().addColumns(
+                   Function.build("LOWER", String.class, Product::getName).as("name"),
+                   Function.build("UPPER", String.class,Product::getLocation).as("location"))
+              ).list(10).forEach(t -> {
+                   log.info(t.toString());
+              });
+}
+
+/**
+Hibernate: 
+    select
+        case p1_0.location 
+            when ? 
+                then cast(? as varchar) 
+            when ? 
+                then cast(? as varchar) 
+            when ? 
+                then cast(? as varchar) 
+            when ? 
+                then cast(? as varchar) 
+            when ? 
+                then cast(? as varchar) 
+            when ? 
+                then cast(? as varchar) 
+            when ? 
+                then cast(? as varchar) 
+            when ? 
+                then cast(? as varchar) 
+            else cast(? as varchar) 
+    end,
+    p1_0.location 
+from
+    example_product p1_0
+**/
+@Test
+public void test7() {
+     IfExpression<String, String> ifExpression = new IfExpression<String, String>(Product::getLocation)
+                .when("Indonesia", "Asia")
+                .when("Japan", "Asia")
+                .when("China", "Asia")
+                .when("Singapore", "Asia")
+                .when("Vietnam", "Asia")
+                .when("Thailand", "Asia")
+                .when("Australia", "Oceania")
+                .when("New Zealand", "Oceania")
+                .otherwise("Other");
+     productDao.customQuery().select(new ColumnList()
+                                        .addColumns(ifExpression.as("area"))
+                                        .addColumns(Product::getLocation)
+                                    ).list().forEach(t -> {
+                                         log.info(t.toString());
+                                    });
+}
+```
+**6. Inner Join & Pagination**
+
+```java
+@Autowired
+private OrderDao orderDao;
+
+@Autowired
+private OrderProductDao orderProductDao;
+
+/**
+Hibernate: 
+    select
+        o1_0.id,
+        o1_0.order_date,
+        o1_0.total_price,
+        o1_0.user_id,
+        u1_0.id,
+        u1_0.email,
+        u1_0.password,
+        u1_0.username 
+    from
+        example_order o1_0 
+    join
+        example_user u1_0 
+            on u1_0.id=o1_0.user_id 
+    where
+        u1_0.username=? 
+    order by
+        o1_0.order_date desc
+**/
+@ParameterizedTest
+@ValueSource(strings = {"Petter", "Jack"})
+public void test3(String username) {
+    orderDao.customQuery().join(Order::getUser, "u", null)
+                          .filter(Restrictions.eq(User::getUsername, username))
+                          .sort(JpaSort.desc(Order::getOrderDate))
+                          .select(new ColumnList()
+                                  .addFields(Fields.root())
+                                  .addTableAlias("u")
+                          ).list().forEach(t -> {
+                              Order order = (Order) t.get(0);
+                              User user = (User) t.get(1);
+                              log.info("Order: " + order + ", User: " + user);
+                          });
+}
+
+/**
+Hibernate: 
+    select
+        count(1) 
+    from
+        example_order o1_0 
+    join
+        example_user u1_0 
+            on u1_0.id=o1_0.user_id 
+    where
+        o1_0.order_date between ? and ? 
+    group by
+        o1_0.order_date,
+        u1_0.username 
+    having
+        avg(o1_0.total_price)>?
+Hibernate: 
+    select
+        u1_0.username,
+        o1_0.order_date,
+        avg(o1_0.total_price) 
+    from
+        example_order o1_0 
+    join
+        example_user u1_0 
+            on u1_0.id=o1_0.user_id 
+    where
+        o1_0.order_date between ? and ? 
+    group by
+        o1_0.order_date,
+        u1_0.username 
+    having
+        avg(o1_0.total_price)>? 
+    order by
+        o1_0.order_date desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+**/
+@Test
+public void test4() {
+    orderDao.customPage().join(Order::getUser, "u", null)
+                         .filter(Restrictions.between(Order::getOrderDate,
+                                      LocalDate.of(2025, 2, 1).atStartOfDay(),
+                                      LocalDate.of(2025, 2, 28).atStartOfDay())
+                          ).groupBy(new FieldList()
+                                     .addFields(Order::getOrderDate)
+                                     .addFields(User::getUsername)
+                          ).having(Restrictions.gt(Fields.avg(Order::getTotalPrice), 20000D))
+                         .sort(JpaSort.desc(Order::getOrderDate))
+                         .select(new ColumnList()
+                                     .addColumns(User::getUsername)
+                                     .addColumns(Order::getOrderDate)
+                                     .addFields(Fields.avg(Order::getTotalPrice))
+                          ).setTransformer(Transformers.asCaseInsensitiveMap())
+                         .paginate(PageRequest.of(5))
+                         .forEachPage(eachPage -> {
+                             log.info(String.format(
+              "====================== PageNumber/TotalPage: %s/%s  Total Records: %s =====================",
+                             eachPage.getPageNumber(), eachPage.getTotalPages(),
+                             eachPage.getTotalRecords()));
+                             eachPage.getContent().forEach(vo -> {
+                                 log.info(vo.toString());
+                             });
+                          });
+}
+
+```
+
+**7. Left Join & Pagination**
+
+```java
+/**
+Hibernate: 
+    select
+        count(1) 
+    from
+        example_order o1_0 
+    left join
+        example_order_product op1_0 
+            on o1_0.id=op1_0.order_id
+Hibernate: 
+    select
+        o1_0.id,
+        o1_0.order_date,
+        o1_0.total_price,
+        o1_0.user_id,
+        p1_0.id,
+        p1_0.discount,
+        p1_0.location,
+        p1_0.name,
+        p1_0.price,
+        p1_0.produce_date 
+    from
+        example_order o1_0 
+    left join
+        example_order_product op1_0 
+            on o1_0.id=op1_0.order_id 
+    left join
+        example_product p1_0 
+            on p1_0.id=op1_0.product_id 
+    order by
+        o1_0.order_date desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+**/
+@Test
+public void test5() {
+    orderDao.customPage()
+            .leftJoin(Order::getOrderProducts, "op", null)
+            .leftJoin(OrderProduct::getProduct, "p", null)
+            .sort(JpaSort.desc(Order::getOrderDate))
+            .select(new ColumnList()
+                    .addFields(Fields.root())
+                    .addTableAlias("p")
+            ).setTransformer(Transformers.asMap())
+            .paginate(PageRequest.of(10))
+            .forEachPage(eachPage -> {
+                 log.info(String.format(
+             "====================== PageNumber/TotalPage: %s/%s  Total Records: %s =====================",
+                 eachPage.getPageNumber(), eachPage.getTotalPages(),
+                 eachPage.getTotalRecords()));
+                 eachPage.getContent().forEach(vo -> {
+                     log.info(vo.toString());
+                 });
+             });
+}
+```
+
+**8. Right Join & Pagination**
+
+```java
+/**
+Hibernate: 
+    select
+        count(1) 
+    from
+        example_order o1_0 
+    right join
+        example_order_product op1_0 
+            on o1_0.id=op1_0.order_id 
+    right join
+        example_product p1_0 
+            on p1_0.id=op1_0.product_id
+Hibernate: 
+    select
+        o1_0.id,
+        o1_0.total_price,
+        o1_0.order_date,
+        op1_0.amount,
+        p1_0.name,
+        p1_0.location 
+    from
+        example_order o1_0 
+    right join
+        example_order_product op1_0 
+            on o1_0.id=op1_0.order_id 
+    right join
+        example_product p1_0 
+            on p1_0.id=op1_0.product_id 
+    order by
+        o1_0.order_date desc,
+        op1_0.amount desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+**/
+@Test
+public void test6() {
+    orderDao.customPage()
+            .rightJoin(Order::getOrderProducts, "op", null)
+            .rightJoin(OrderProduct::getProduct, "p", null)
+            .sort(JpaSort.desc(Order::getOrderDate), 
+                  JpaSort.desc(OrderProduct::getAmount)
+             ).select(new ColumnList()
+                  .addColumns(Order::getId, 
+                              Order::getTotalPrice, 
+                              Order::getOrderDate)
+                  .addColumns(OrderProduct::getAmount)
+                  .addColumns(Product::getName, 
+                              Product::getLocation)
+             ).setTransformer(Transformers.asMap())
+              .paginate(PageRequest.of(10))
+              .forEachPage(eachPage -> {
+                   log.info(String.format(
+            "====================== PageNumber/TotalPage: %s/%s  Total Records: %s ======================",
+                   eachPage.getPageNumber(), 
+                   eachPage.getTotalPages(),
+                   eachPage.getTotalRecords()));
+                   eachPage.getContent().forEach(vo -> {
+                       log.info(vo.toString());
+                   });
+             });
+}
+```
+
+**9. Cross Join & Pagination**
+
+``` java
+/**
+Hibernate: 
+    select
+        count(1) 
+    from
+        example_product p1_0,
+        example_stock s1_0 
+    where
+        s1_0.product_id=p1_0.id
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.name,
+        s1_0.amount 
+    from
+        example_product p1_0,
+        example_stock s1_0 
+    where
+        s1_0.product_id=p1_0.id 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+**/
+@Test
+public void test8() {
+    productDao.customPage()
+              .crossJoin(Stock.class, "a")
+              .filter(new FilterList()
+                      .eq(Stock::getProductId, Product::getId)
+              ).select(new ColumnList()
+                       .addColumns(Product::getId, 
+                                   Product::getName
+                       ).addColumns(Stock::getAmount)
+              ).setTransformer(Transformers.asBean(ProductStockVo.class))
+               .paginate(PageRequest.of(10))
+               .forEachPage(eachPage -> {
+                    log.info(String.format(
+              "====================== PageNumber/TotalPage: %s/%s  Total Records: %s =====================",
+                    eachPage.getPageNumber(), 
+                    eachPage.getTotalPages(),
+                    eachPage.getTotalRecords()));
+                    eachPage.getContent().forEach(vo -> {
+                        log.info(vo.toString());
+                    });
+              });
+}
+```
+
+**10. Subquery &  Join**
+
+``` java
+/**
+Hibernate: 
+    select
+        distinct o1_0.user_id 
+    from
+        example_order o1_0 
+    where
+        exists(select
+            1 
+        from
+            example_user u2_0 
+        where
+            u2_0.id=o1_0.user_id)
+**/
+@Test
+public void test1() {
+    JpaQuery<Order, Tuple> jpaQuery = orderDao.customQuery();
+    JpaSubQuery<User, Long> jpaSubQuery = jpaQuery.subQuery(User.class, "u", Long.class)
+                                                  .filter(Restrictions.eq(User::getId, Order::getUser))
+                                                  .select(Fields.toLong(1L));
+    jpaQuery.filter(Restrictions.exists(jpaSubQuery))
+            .distinct()
+            .select(new ColumnList(Order::getUser))
+            .list().forEach(m -> {
+                 log.info(m.toString());
+            });
+}
+
+/**
+Hibernate: 
+    select
+        op1_0.order_id,
+        op1_0.product_id,
+        op1_0.amount,
+        p1_0.name,
+        u1_0.username 
+    from
+        example_order_product op1_0 
+    left join
+        example_product p1_0 
+            on p1_0.id=op1_0.product_id 
+    join
+        example_order o1_0 
+            on o1_0.id=op1_0.order_id 
+    join
+        example_user u1_0 
+            on u1_0.id=o1_0.user_id 
+    where
+        exists(select
+            p3_0.id 
+        from
+            example_product p3_0 
+        where
+            p3_0.id=op1_0.product_id 
+            and p3_0.name=?) 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+**/
+@ParameterizedTest
+@ValueSource(strings = {"Microwave oven", "Coffee maker"})
+public void test2(String itemName) {
+     JpaQuery<OrderProduct, Tuple> jpaQuery = orderProductDao.customQuery();
+     JpaSubQuery<Product, Long> jpaSubQuery = jpaQuery.subQuery(Product.class, "p", Long.class)
+                                              .filter(new FilterList()
+                                              .eq(Product::getId, OrderProduct::getProduct)
+                                                  .and()
+                                              .eq(Product::getName, itemName)
+                                               ).select(Product::getId);
+     jpaQuery.leftJoin(OrderProduct::getProduct, "p", null)
+             .join(Order.class, "o", null)
+             .join(User.class, "u", null)
+             .filter(Restrictions.exists(jpaSubQuery))
+             .select(new ColumnList(
+                                    OrderProduct::getOrder, 
+                                    OrderProduct::getProduct,
+                                    OrderProduct::getAmount
+                                   ).addColumns(Product::getName)
+                                    .addColumns(User::getUsername)
+             ).setTransformer(Transformers.asMap())
+              .list(10)
+              .forEach(m -> {
+                  log.info(m.toString());
+              });
+}
+```
+**11. Update with Subquery**
+```java
+/**
+Hibernate: 
+    update
+        example_stock s1_0 
+    set
+        amount=(s1_0.amount+cast(? as integer)) 
+    where
+        s1_0.product_id in ((select
+            p1_0.id 
+        from
+            example_product p1_0 
+        where
+            p1_0.location=?))
+**/
+@ParameterizedTest
+@ValueSource(strings = {"Australia", "New Zealand"})
+public void test9(String location) {
+    JpaSubQuery<Product, Long> subQuery = stockDao.update().subQuery(Product.class, Long.class)
+                .filter(Restrictions.eq(Product::getLocation, location)).select(Product::getId);
+    stockDao.update()
+            .setField(Stock::getAmount, Fields.plusValue(Stock::getAmount, 1000))
+            .filter(Restrictions.in(Stock::getProductId, subQuery))
+            .execute();
+}
+```
+
+**12. Delete with Subquery**
+```java
+/**
+Hibernate: 
+    delete 
+    from
+        example_order o1_0 
+    where
+        exists(select
+            op1_0.order_id 
+        from
+            example_order_product op1_0 
+        join
+            example_product p1_0 
+                on p1_0.id=op1_0.product_id 
+        where
+            p1_0.id=op1_0.product_id 
+            and p1_0.name in (?, ?))
+**/
+@ParameterizedTest
+@CsvSource({"'Flashlight,Iron'"})
+public void test7(String str) {
+     String[] itemNames = str.split(",");
+     JpaSubQuery<OrderProduct, Order> subQuery =
+                orderDao.query()
+                        .subQuery(OrderProduct.class, "o", Order.class)
+                        .join(OrderProduct::getProduct, "p", null)
+                        .filter(new FilterList()
+                                .eq(Product::getId, OrderProduct::getProduct)
+                                .in(Product::getName, List.of(itemNames)))
+                        .select(OrderProduct::getOrder);
+     int rows = orderDao.delete().filter(Restrictions.exists(subQuery)).execute();
+     log.info("Affected rows: {}", rows);
+}
+```
+
+## Get Started
+
+* JDK 17 or later
+* Spring Boot 3.x or latest preferred
+* H2, Postgresql, MySQL perfect supported
+* pom.xml
+
 ``` xml
 <dependency>
-<groupId>com.github.paganini2008.springworld</groupId>
-<artifactId>fastjpa-spring-boot-starter</artifactId>
-<version>2.0.1</version>
+    <groupId>com.github.paganini2008</groupId>
+    <artifactId>easyjpa-spring-boot-starter</artifactId>
+    <version>1.0.0-RC1</version>  <!-- use the latest version here -->
 </dependency>
 ```
-### Compatibility
-1. jdk1.8 (or later)
-2. <code>SpringBoot Framework 2.2.x</code> (or later)
-3. Hibernate 5.x (or later)
 
-### Examples
-
-In order to better explain how to use <code>fastjpa's</code> API, Here are three entities: User, Product, Order
-
-**User**
+* Java Configuration
 
 ``` java
-@Getter
-@Setter
+@EntityScan(basePackages = {"com.github.easyjpa.test.entity"})
+@EnableJpaRepositories(repositoryFactoryBeanClass = EntityDaoFactoryBean.class,
+        basePackages = {"com.github.easyjpa.test.dao"})
+@Configuration(proxyBeanMethods = false)
+public class JpaConfig {
+    
+}
+```
+
+* Entity Definition
+
+```java
 @Entity
-@Table(name = "demo_user")
+@Table(name = "example_user")
 public class User {
-	
-	@Id
-	@Column(name = "id", nullable = false, unique = true)
-	private Long id;
-	
-	@Column(name = "name", nullable = false, length = 45)
-	private String name;
-	
-	@Column(name = "phone", nullable = false, length = 45)
-	private String phone;
-	
-	@Column(name = "vip", nullable = true)
-	@org.hibernate.annotations.Type(type = "yes_no")
-	private Boolean vip;
-
+   ...
 }
-```
 
-**Product**
-``` java
-@Getter
-@Setter
 @Entity
-@Table(name = "demo_product")
+@Table(name = "example_product")
 public class Product {
-
-	@Id
-	@Column(name = "id", nullable = false, unique = true)
-	private Long id;
-
-	@Column(name = "name", nullable = false, length = 45)
-	private String name;
-
-	@Column(name = "price", nullable = false, precision = 11, scale = 2)
-	private BigDecimal price;
-
-	@Column(name = "origin", nullable = true, length = 225)
-	private String origin;
-
+    ...
 }
-```
 
-**Order**
-``` java
-@Getter
-@Setter
 @Entity
-@Table(name = "demo_order")
+@Table(name = "example_order")
 public class Order {
-
-	@Id
-	@Column(name = "id", nullable = false, unique = true)
-	private Long id;
-
-	@Column(name = "discount", nullable = true)
-	private Float discount;
-
-	@Column(name = "price", nullable = false, precision = 11, scale = 2)
-	private BigDecimal price;
-
-	@OneToOne(targetEntity = Product.class)
-	@JoinColumn(nullable = false, name = "product_id", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
-	private Product product;
-
-	@ManyToOne(targetEntity = User.class)
-	@JoinColumn(nullable = false, name = "user_id", foreignKey = @ForeignKey(name = "none", value = ConstraintMode.NO_CONSTRAINT))
-	private User user;
-
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "create_time", columnDefinition = "timestamp null ")
-	private Date createTime;
-
+    ...
 }
 ```
 
-Then define the corresponding Dao, you need to inherit the <code>EntityDao</code> provided by <code>fastjpa</code>, but if you don’t want to use <code>fastjpa</code>, just inherit <code>JpaRepositoryImplementation</code> directly. <code>EntityDao</code> is the entrance to all APIs of <code>fastjpa</code>
-**<code>UserDao</code>**
+* DAO (Repository) Definition
 
+
+##### UserDao
 ``` java
 public interface UserDao extends EntityDao<User, Long> {
+
 }
 ```
-**<code>OrderDao</code>**
-
+##### OrderDao
 ``` java
 public interface OrderDao extends EntityDao<Order, Long> {
+
 }
 ```
-**<code>ProductDao</code>**
-
+##### ProductDao
 ``` java
 public interface ProductDao extends EntityDao<Product, Long> {
+
 }
 ```
-#### Filter Statement
-Equivalent to where condition
-Support <code>lt, lte, gt, gte, eq, ne, like, in, between, isNull, notNull</code> and other comparison operators
-``` java
-LogicalFilter filter = Restrictions.between("price", 10, 50);
-filter = Restrictions.in("price", Arrays.asList(10,20,30,40,50));
-filter =Restrictions.like("name", "%jpa%");
-filter = Restrictions.eq("orignal", "Sydney");
-```
-Support and, or, not logical operators
-``` java
-LogicalFilter filter = Restrictions.between("price", 10, 50);
-filter = filter.and(Restrictions.like("name", "%jpa%"));
-filter = filter.and(Restrictions.eq("orignal", "Sydney"));
-```
-**Example Code: **
-``` java
-		LogicalFilter filter = Restrictions.gt("price", 50);
-		productDao.query().filter(filter).selectThis().list().forEach(pro -> {
-			System.out.println(pro);
-		});
-// Hibernate: select product0_.id as id1_1_, product0_.name as name2_1_, product0_.origin as origin3_1_, product0_.price as price4_1_ from demo_product product0_ where product0_.price>50.0
-```
-#### Group Statement
-**Example Code: **
-
-``` java
-productDao.multiquery().groupBy("origin").select(Column.forName("origin"), Fields.count(Fields.toInteger(1)).as("count")).list().forEach(t -> {
-	System.out.println("origin: "+t.get("origin") + "\tcount: " + t.get("count"));
-});
-// Hibernate: select product0_.origin as col_0_0_, count(1) as col_1_0_ from demo_product product0_ group by product0_.origin
-
-```
-#### Order Statement
-**Example Code: **
-``` java
-orderDao.query().filter(Restrictions.gte("price", 50)).sort(JpaSort.desc("createTime"), JpaSort.asc("price")).selectThis().list(10).forEach(pro -> {
-					System.out.println(pro);
-				});
-// Hibernate: select order0_.id as id1_0_, order0_.create_time as create_t2_0_, order0_.discount as discount3_0_, order0_.price as price4_0_, order0_.product_id as product_6_0_, order0_.receiver as receiver5_0_, order0_.user_id as user_id7_0_ from demo_order order0_ where order0_.price>=50.0 order by order0_.create_time desc, order0_.price asc limit ?
-```
-
-#### Join Statement
-**Left Join Example Code: **
-``` java
-PageResponse<Tuple> pageResponse = orderDao.multiselect().leftJoin("product", "p")
-	.filter(Restrictions.gte("p", "price", 50)).sort(JpaSort.desc("createTime")).selectAlias("p")
-				.list(PageRequest.of(10));
-		for (PageResponse<Tuple> current : pageResponse) {
-			System.out.println("第" + current.getPageNumber() + "页");
-			for (Tuple tuple : current.getContent()) {
-				System.out.println(Arrays.toString(tuple.toArray()));
-			}
-		}
-// Hibernate: select product1_.id as id1_1_, product1_.name as name2_1_, product1_.origin as origin3_1_, product1_.price as price4_1_ from demo_order order0_ left outer join demo_product product1_ on order0_.product_id=product1_.id where product1_.price>=50.0 order by order0_.create_time desc limit ?, ?
-```
-
-**Inner Join Example Code: **
-``` java
-		ColumnList columnList = new ColumnList();
-		columnList.addColumn("id");
-		columnList.addColumn("p","name");
-		columnList.addColumn(Property.forName("p", "price"),"originalPrice");
-		columnList.addColumn("price");
-		columnList.addColumn("createTime");
-		PageResponse<Tuple> pageResponse = orderDao.multiselect().join("product", "p")
-				.filter(Restrictions.gte("p", "price", 50)).sort(JpaSort.desc("createTime")).select(columnList)
-				.list(PageRequest.of(10));
-		for (PageResponse<Tuple> current : pageResponse) {
-			System.out.println("第" + current.getPageNumber() + "页");
-			for (Tuple tuple : current.getContent()) {
-				System.out.println(Arrays.toString(tuple.toArray()));
-			}
-		}
-// Hibernate: select order0_.id as col_0_0_, product1_.name as col_1_0_, product1_.price as col_2_0_, order0_.price as col_3_0_, order0_.create_time as col_4_0_ from demo_order order0_ inner join demo_product product1_ on order0_.product_id=product1_.id where product1_.price>=50.0 order by order0_.create_time desc limit ?, ?
-```
-
-#### Function Statement
-**Aggregation Function Example Code: **
-``` java
-ColumnList columnList = new ColumnList()
-				.addColumn(Fields.max("price", BigDecimal.class), "maxPrice")
-				.addColumn(Fields.min("price", BigDecimal.class), "minPrice")
-				.addColumn(Fields.avg("price", Double.class), "avgPrice")
-				.addColumn(Fields.count(Fields.toInteger(1)), "count")
-				.addColumn("origin");
-productDao.multiquery().groupBy("origin").select(columnList).setTransformer(Transformers.asBean(ProductVO.class)).list().forEach(vo -> {
-	System.out.println(vo);
-});
-```
-**Other Function Example Code: **
-``` java
-ColumnList columnList = new ColumnList()
-       .addColumn(Function.build("LOWER", String.class, "name"), "name")
-       .addColumn(Function.build("UPPER", String.class, "origin"), "origin");
-productDao.multiquery().select(columnList).list(10).forEach(t -> {
-	System.out.println("name: " + t.get("name") + "\t origin: " + t.get("origin"));
-});
-// Hibernate: select lower(product0_.name) as col_0_0_, upper(product0_.origin) as col_1_0_ from demo_product product0_ limit ?
-```
-
-**Case When Example Code: **
-
-``` java
-IfExpression<String, String> ifExpression = new IfExpression<String, String>(Property.forName("origin", String.class));
-		ifExpression = ifExpression.when("Shanghai", "Asia")
-				                   .when("Tokyo", "Asia")
-				                   .when("New York", "North America")
-				                   .when("Washington", "North America")
-				                   .otherwise("Other Area");
-		ColumnList columnList = new ColumnList().addColumn(ifExpression, "Area")
-				                                .addColumn(Fields.count(Fields.toInteger(1)), "Count");
-		productDao.multiquery().groupBy(Fields.toInteger(1)).select(columnList).list().forEach(t -> {
-			System.out.println("Area: " + t.get(0) + "\t Count: " + t.get(1));
-		});
-// Hibernate: select case product0_.origin when 'Shanghai' then 'Asia' when 'Tokyo' then 'Asia' when 'New York' then 'North America' when 'Washington' then 'North America' else 'Other Area' end as col_0_0_, count(1) as col_1_0_ from demo_product product0_ group by 1
-```
-
-### <code>SubQuery</code> Statement
-``` java
-JpaQuery<Order,Order> jpaQuery = orderDao.query();
-JpaSubQuery<Product, BigDecimal> subQuery = jpaQuery.subQuery(Product.class, "p", BigDecimal.class)
-				.select(Fields.avg(Property.forName("p", "price")));
-jpaQuery.filter(Restrictions.gte("price", subQuery)).selectThis().list(10).forEach(pro -> {
-			System.out.println(pro);
-		});
-// Hibernate: select order0_.id as id1_0_, order0_.create_time as create_t2_0_, order0_.discount as discount3_0_, order0_.price as price4_0_, order0_.product_id as product_6_0_, order0_.receiver as receiver5_0_, order0_.user_id as user_id7_0_ from demo_order order0_ where order0_.price>=(select avg(product1_.price) from demo_product product1_) limit ?
-```
-
-#### Finally, In fact, <code>fastjpa</code> appeared to improve the efficiency of developers using JPA. If there is a situation where <code>fastjpa</code> cannot meet business needs, please use local <code>sql</code> decisively
 
 
 
+## Contribution and License
+
+This project is open source and licensed under the **MIT License**.
+
+## Project Link
+
+For more information, visit the **EasyJPA GitHub repository**: [paganini2008/easyjpa](https://github.com/paganini2008/easyjpa).
