@@ -1,0 +1,1 @@
+# fastjpa-spring-boot-starter
