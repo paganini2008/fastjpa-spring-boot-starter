@@ -34,20 +34,20 @@ import com.github.paganini2008.devtools.jdbc.ResultSetSlice;
 @SuppressWarnings("all")
 public class NativeQueryResultSetSlice<E> implements ResultSetSlice<E> {
 
-	NativeQueryResultSetSlice(String sql, Object[] arguments, Class<E> entityClass, EntityManager em) {
+	public NativeQueryResultSetSlice(String sql, Object[] arguments, Class<E> entityClass, EntityManager em) {
 		this.sql = sql;
 		this.arguments = arguments;
 		this.em = em;
 		this.entityClass = entityClass;
 	}
 
-	protected final String sql;
-	protected final Object[] arguments;
-	protected final EntityManager em;
-	protected final Class<E> entityClass;
+	private final String sql;
+	private final Object[] arguments;
+	private final EntityManager em;
+	private final Class<E> entityClass;
 
 	public List<E> list(int maxResults, int firstResult) {
-		Query query = em.createNativeQuery(sql, entityClass);
+		Query query = entityClass != null ? em.createNativeQuery(sql, entityClass) : em.createNativeQuery(sql);
 		if (arguments != null && arguments.length > 0) {
 			int index = 1;
 			for (Object arg : arguments) {
