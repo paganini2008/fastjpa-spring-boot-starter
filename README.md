@@ -1,4 +1,5 @@
-###  <code>Fastjpa</code>, a simple and quick development tools of JPA
+# Fastjpa
+### a graceful development tools of JPA
 It provides a secondary encapsulation of JPA in the <code>SpringBoot</code> framework, provides an object-oriented way to operate JQL/HQL, aims to reduce the writing of <code>sql</code> statements, quickly improve development efficiency, make code writing more elegant and increase readability
 
 <code>fastjpa-spring-boot-starter</code> relies on <code>spring-boot-starter-data-jpa</code>, which essentially repackages the JPA Criteria query API (QBC) and is designed as a stream style API (somewhat similar to python's <code>orm framework Sqlalchemy</code>) , Making the JPA object-oriented query API no longer difficult to use
