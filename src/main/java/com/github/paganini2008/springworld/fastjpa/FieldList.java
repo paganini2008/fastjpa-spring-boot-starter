@@ -24,7 +24,7 @@ import java.util.Arrays;
  *
  * @author Fred Feng
  * 
- * @since 1.0
+ * @since 2.0.1
  */
 public class FieldList extends ArrayList<Field<?>> {
 

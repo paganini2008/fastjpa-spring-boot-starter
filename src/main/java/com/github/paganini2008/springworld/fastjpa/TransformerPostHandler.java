@@ -20,7 +20,7 @@ package com.github.paganini2008.springworld.fastjpa;
  * TransformerPostHandler
  *
  * @author Fred Feng
- * @version 1.0
+ * @since 2.0.1
  */
 @FunctionalInterface
 public interface TransformerPostHandler<T, R> {

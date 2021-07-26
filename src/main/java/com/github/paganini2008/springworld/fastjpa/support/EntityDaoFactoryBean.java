@@ -32,7 +32,7 @@ import com.github.paganini2008.springworld.fastjpa.support.hibernate.HibernateDa
  * EntityDaoFactoryBean
  * 
  * @author Fred Feng
- * @version 1.0
+ * @since 2.0.1
  */
 @SuppressWarnings("all")
 public class EntityDaoFactoryBean<R extends JpaRepository<E, ID>, E, ID> extends JpaRepositoryFactoryBean<R, E, ID> {

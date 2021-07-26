@@ -28,7 +28,7 @@ import javax.persistence.criteria.Expression;
  * 
  * @author Fred Feng
  *
- * @since 1.0
+ * @since 2.0.1
  */
 public class IfExpression<T, R> implements Field<R> {
 

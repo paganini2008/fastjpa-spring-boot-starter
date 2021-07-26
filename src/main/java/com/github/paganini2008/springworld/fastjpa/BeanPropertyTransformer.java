@@ -23,7 +23,7 @@ import com.github.paganini2008.springworld.fastjpa.support.BeanReflection;
  * 
  * @author Fred Feng
  *
- * @version 1.0
+ * @since 2.0.1
  */
 public class BeanPropertyTransformer<T, R> extends AbstractTransformer<T, R> {
 

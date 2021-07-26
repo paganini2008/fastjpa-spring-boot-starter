@@ -23,7 +23,7 @@ import com.github.paganini2008.devtools.jdbc.ResultSetSlice;
  * 
  * @author Fred Feng
  *
- * @since 1.0
+ * @since 2.0.1
  */
 public interface JpaPageResultSet<T> extends ResultSetSlice<T> {
 

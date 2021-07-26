@@ -27,7 +27,7 @@ import com.github.paganini2008.devtools.jdbc.ResultSetSlice;
  * 
  * @author Fred Feng
  *
- * @version 1.0
+ * @since 2.0.1
  */
 public class JpaGroupPageResultSet<T> implements JpaPageResultSet<T> {
 

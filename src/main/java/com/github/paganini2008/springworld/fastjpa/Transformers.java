@@ -29,7 +29,7 @@ import com.github.paganini2008.devtools.collection.CaseInsensitiveMap;
  * Transformers
  *
  * @author Fred Feng
- * @version 1.0
+ * @since 2.0.1
  */
 public abstract class Transformers {
 
@@ -68,7 +68,7 @@ public abstract class Transformers {
 	 * 
 	 * @author Fred Feng
 	 *
-	 * @version 1.0
+	 * @since 2.0.1
 	 */
 	public static class NoopTransformer<T> implements Transformer<T, T> {
 
@@ -93,7 +93,7 @@ public abstract class Transformers {
 	 * 
 	 * @author Fred Feng
 	 *
-	 * @version 1.0
+	 * @since 2.0.1
 	 */
 	public static class MapTransformer<T> extends AbstractTransformer<T, Map<String, Object>> {
 
@@ -122,7 +122,7 @@ public abstract class Transformers {
 	 * 
 	 * @author Fred Feng
 	 *
-	 * @version 1.0
+	 * @since 2.0.1
 	 */
 	public static class ListTransformer<T> extends AbstractTransformer<T, List<Object>> {
 

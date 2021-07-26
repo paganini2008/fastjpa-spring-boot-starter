@@ -21,7 +21,7 @@ package com.github.paganini2008.springworld.fastjpa;
  * 
  * @author Fred Feng
  *
- * @version 1.0
+ * @since 2.0.1
  */
 public interface JpaPage<E, T> {
 
