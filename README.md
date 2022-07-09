@@ -156,17 +156,20 @@ public interface ProductDao extends EntityDao<Product, Long> {
 *Comparison operators*
 
 ``` java
-LogicalFilter filter = Restrictions.between("price", 10, 50);
-filter = Restrictions.in("price", Arrays.asList(10,20,30,40,50));
-filter =Restrictions.like("name", "%jpa%");
-filter = Restrictions.eq("orignal", "Sydney");
+LogicalFilter filter = Restrictions.between("price", 10, 50);  // where price between (10,50)
+filter = Restrictions.in("price", Arrays.asList(10,20,30,40,50)); // where price in (10,20,30,40,50)
+filter = Restrictions.like("name", "%jpa%"); // where name like '%jpa%'
+filter = Restrictions.eq("orignal", "Sydney"); // where orignal='Sydney'
+
 ```
 *Logical operators*
 
 ``` java
 LogicalFilter filter = Restrictions.between("price", 10, 50);
 filter = filter.and(Restrictions.like("name", "%jpa%"));
-filter = filter.and(Restrictions.eq("orignal", "Sydney"));
+filter = filter.and(Restrictions.eq("orignal", "Sydney")); 
+
+// Equivalent to: where price between (10,50) and name like '%jpa%' and orignal='Sydney'
 ```
 *Example*
 
