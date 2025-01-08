@@ -5,9 +5,9 @@ A very cool JPA developping tookit, which provides an API  to use  JPA core clas
 
 ``` xml
 <dependency>
-  <groupId>com.github.paganini2008.springworld</groupId>
+  <groupId>com.github.paganini2008</groupId>
   <artifactId>fastjpa-spring-boot-starter</artifactId>
-  <version>2.0.1</version>
+  <version>1.0.0-SNAPSHOT</version>
 </dependency>
 
 ```
