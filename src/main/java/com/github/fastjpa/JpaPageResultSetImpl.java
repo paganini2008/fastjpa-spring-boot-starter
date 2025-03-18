@@ -1,28 +1,33 @@
 /**
- * Copyright 2017-2025 Fred Feng (paganini.fy@gmail.com)
+ * Copyright 2017-2021 Fred Feng (paganini.fy@gmail.com)
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.github.fastjpa;
 
 import java.util.List;
-import javax.persistence.criteria.CriteriaQuery;
+
 import com.github.paganini2008.devtools.jdbc.ResultSetSlice;
+
+import jakarta.persistence.criteria.CriteriaQuery;
 
 /**
  * 
- * @Description: JpaPageResultSetImpl
- * @Author: Fred Feng
- * @Date: 08/01/2025
- * @Version 1.0.0
+ * JpaPageResultSetImpl
+ * 
+ * @author Fred Feng
+ *
+ * @since 2.0.1
  */
 public class JpaPageResultSetImpl<T> implements JpaPageResultSet<T> {
 
@@ -32,7 +37,7 @@ public class JpaPageResultSetImpl<T> implements JpaPageResultSet<T> {
     private final JpaCustomQuery<?> customQuery;
 
     JpaPageResultSetImpl(Model<?> model, CriteriaQuery<T> query, CriteriaQuery<Long> counter,
-            JpaCustomQuery<?> customQuery) {
+                         JpaCustomQuery<?> customQuery) {
         this.model = model;
         this.query = query;
         this.counter = counter;

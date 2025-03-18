@@ -1,20 +1,8 @@
-/**
- * Copyright 2017-2025 Fred Feng (paganini.fy@gmail.com)
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
 package com.github.fastjpa;
 
-import javax.persistence.criteria.CriteriaQuery;
+import java.util.List;
 import com.github.fastjpa.LambdaUtils.LambdaInfo;
+import jakarta.persistence.criteria.CriteriaQuery;
 
 /**
  * 
@@ -25,7 +13,87 @@ import com.github.fastjpa.LambdaUtils.LambdaInfo;
  */
 public interface JpaQuery<E, T> {
 
+    default <R> JpaQuery<E, T> eq(SerializedFunction<E, R> sf, R value) {
+        return filter(Restrictions.eq(sf, value));
+    }
+
+    default JpaQuery<E, T> eqProperty(SerializedFunction<E, ?> leftSf,
+            SerializedFunction<E, ?> rightSf) {
+        return filter(Restrictions.eqProperty(leftSf, rightSf));
+    }
+
+    default <R extends Comparable<R>> JpaQuery<E, T> lt(SerializedFunction<E, R> sf, R value) {
+        return filter(Restrictions.lt(sf, value));
+    }
+
+    default <R extends Comparable<R>> JpaQuery<E, T> lte(SerializedFunction<E, R> sf, R value) {
+        return filter(Restrictions.lte(sf, value));
+    }
+
+    default <R extends Comparable<R>> JpaQuery<E, T> gt(SerializedFunction<E, R> sf, R value) {
+        return filter(Restrictions.gt(sf, value));
+    }
+
+    default <R extends Comparable<R>> JpaQuery<E, T> gte(SerializedFunction<E, R> sf, R value) {
+        return filter(Restrictions.gte(sf, value));
+    }
+
+    default <R extends Comparable<R>> JpaQuery<E, T> ne(SerializedFunction<E, R> sf, R value) {
+        return filter(Restrictions.ne(sf, value));
+    }
+
+    default JpaQuery<E, T> neProperty(SerializedFunction<E, ?> leftSf,
+            SerializedFunction<E, ?> rightSf) {
+        return filter(Restrictions.neProperty(leftSf, rightSf));
+    }
+
+    default JpaQuery<E, T> like(SerializedFunction<E, String> sf, String pattern) {
+        return filter(Restrictions.like(sf, pattern));
+    }
+
+    default JpaQuery<E, T> like(SerializedFunction<E, String> sf, String pattern, char escapeChar) {
+        return filter(Restrictions.like(sf, pattern, escapeChar));
+    }
+
+    default JpaQuery<E, T> notLike(SerializedFunction<E, String> sf, String pattern) {
+        return filter(Restrictions.notLike(sf, pattern));
+    }
+
+    default JpaQuery<E, T> notLike(SerializedFunction<E, String> sf, String pattern,
+            char escapeChar) {
+        return filter(Restrictions.notLike(sf, pattern, escapeChar));
+    }
+
+    default <R> JpaQuery<E, T> in(SerializedFunction<E, R> sf, Iterable<R> iterable) {
+        return filter(Restrictions.in(sf, iterable));
+    }
+
+    default <R extends Comparable<R>> JpaQuery<E, T> between(SerializedFunction<E, R> sf,
+            R startValue, R endValue) {
+        return filter(Restrictions.between(sf, startValue, endValue));
+    }
+
+    default JpaQuery<E, T> isNull(SerializedFunction<E, String> sf) {
+        return filter(Restrictions.isNull(sf));
+    }
+
+    default JpaQuery<E, T> notNull(SerializedFunction<E, String> sf) {
+        return filter(Restrictions.notNull(sf));
+    }
+
+    default JpaQuery<E, T> and(Filter... filters) {
+        return filter(Restrictions.and(List.of(filters)));
+    }
+
+    default JpaQuery<E, T> or(Filter... filters) {
+        return filter(Restrictions.or(List.of(filters)));
+    }
+
     JpaQuery<E, T> filter(Filter filter);
+
+    default JpaQuery<E, T> orderBy(SerializedFunction<E, String> sf, boolean asc) {
+        return sort(asc ? JpaSort.asc(sf) : JpaSort.desc(sf));
+    }
 
     JpaQuery<E, T> sort(JpaSort... sorts);
 
@@ -39,6 +107,11 @@ public interface JpaQuery<E, T> {
 
     default JpaGroupBy<E, T> groupBy(Field<?>... fields) {
         return groupBy(new FieldList(fields));
+    }
+
+    default JpaGroupBy<E, T> groupBy(
+            @SuppressWarnings("unchecked") SerializedFunction<E, ?>... sFuns) {
+        return groupBy(new FieldList().addField(sFuns));
     }
 
     JpaGroupBy<E, T> groupBy(FieldList fieldList);

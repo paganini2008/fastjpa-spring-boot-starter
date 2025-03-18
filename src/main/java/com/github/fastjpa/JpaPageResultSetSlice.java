@@ -1,5 +1,5 @@
 /**
- * Copyright 2017-2025 Fred Feng (paganini.fy@gmail.com)
+ * Copyright 2017-2021 Fred Feng (paganini.fy@gmail.com)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -15,15 +15,15 @@ package com.github.fastjpa;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Selection;
 import com.github.paganini2008.devtools.jdbc.ResultSetSlice;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Selection;
 
 /**
  * 
  * @Description: JpaPageResultSetSlice
  * @Author: Fred Feng
- * @Date: 08/01/2025
+ * @Date: 18/03/2025
  * @Version 1.0.0
  */
 public class JpaPageResultSetSlice<T, R> implements ResultSetSlice<R> {

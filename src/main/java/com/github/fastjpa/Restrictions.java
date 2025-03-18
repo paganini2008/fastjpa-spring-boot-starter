@@ -1,21 +1,7 @@
-/**
- * Copyright 2017-2025 Fred Feng (paganini.fy@gmail.com)
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
 package com.github.fastjpa;
 
-import java.util.List;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Predicate;
 
 /**
  * 
@@ -43,16 +29,16 @@ public abstract class Restrictions {
         return lt(Property.forName(sf), value);
     }
 
-    public static <T extends Comparable<T>> LogicalFilter lt(String alias, String attributeName,
-            T value) {
+    public static <R extends Comparable<R>> LogicalFilter lt(String alias, String attributeName,
+            R value) {
         return lt(Property.forName(alias, attributeName), value);
     }
 
-    public static <T extends Comparable<T>> LogicalFilter lt(String attributeName, T value) {
+    public static <R extends Comparable<R>> LogicalFilter lt(String attributeName, R value) {
         return lt(null, attributeName, value);
     }
 
-    public static <T extends Comparable<T>> LogicalFilter lt(Field<T> field, T value) {
+    public static <R extends Comparable<R>> LogicalFilter lt(Field<R> field, R value) {
         return create(field, (model, expression, builder) -> {
             return builder.lessThan(expression, value);
         });
@@ -550,7 +536,7 @@ public abstract class Restrictions {
         });
     }
 
-    public static LogicalFilter or(List<Filter> filters) {
+    public static LogicalFilter or(Iterable<Filter> filters) {
         LogicalFilter result = disjuction();
         for (Filter filter : filters) {
             result = result.or(filter);
@@ -558,7 +544,7 @@ public abstract class Restrictions {
         return result;
     }
 
-    public static LogicalFilter and(List<Filter> filters) {
+    public static LogicalFilter and(Iterable<Filter> filters) {
         LogicalFilter result = juction();
         for (Filter filter : filters) {
             result = result.and(filter);

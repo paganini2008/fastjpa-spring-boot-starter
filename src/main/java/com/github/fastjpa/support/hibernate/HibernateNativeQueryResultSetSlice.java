@@ -1,5 +1,5 @@
 /**
- * Copyright 2017-2025 Fred Feng (paganini.fy@gmail.com)
+ * Copyright 2017-2021 Fred Feng (paganini.fy@gmail.com)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -15,17 +15,17 @@ package com.github.fastjpa.support.hibernate;
 
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.springframework.data.jpa.repository.query.QueryUtils;
 import com.github.paganini2008.devtools.jdbc.ResultSetSlice;
+import jakarta.persistence.EntityManager;
 
 /**
  * 
  * @Description: HibernateNativeQueryResultSetSlice
  * @Author: Fred Feng
- * @Date: 08/01/2025
+ * @Date: 18/03/2025
  * @Version 1.0.0
  */
 public class HibernateNativeQueryResultSetSlice<T> implements ResultSetSlice<T> {

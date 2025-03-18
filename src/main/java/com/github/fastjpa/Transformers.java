@@ -1,30 +1,18 @@
-/**
- * Copyright 2017-2025 Fred Feng (paganini.fy@gmail.com)
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
+
 package com.github.fastjpa;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.criteria.Selection;
 import com.github.paganini2008.devtools.collection.CaseInsensitiveMap;
+import jakarta.persistence.criteria.Selection;
 
 /**
  * 
  * @Description: Transformers
  * @Author: Fred Feng
- * @Date: 08/01/2025
+ * @Date: 18/03/2025
  * @Version 1.0.0
  */
 public abstract class Transformers {
@@ -61,11 +49,10 @@ public abstract class Transformers {
 
     /**
      * 
-     * NoopTransformer
-     * 
-     * @author Fred Feng
-     *
-     * @since 2.0.1
+     * @Description: NoopTransformer
+     * @Author: Fred Feng
+     * @Date: 18/03/2025
+     * @Version 1.0.0
      */
     public static class NoopTransformer<T> implements Transformer<T, T> {
 
@@ -85,11 +72,10 @@ public abstract class Transformers {
 
     /**
      * 
-     * MapTransformer
-     * 
-     * @author Fred Feng
-     *
-     * @since 2.0.1
+     * @Description: MapTransformer
+     * @Author: Fred Feng
+     * @Date: 18/03/2025
+     * @Version 1.0.0
      */
     public static class MapTransformer<T> extends AbstractTransformer<T, Map<String, Object>> {
 

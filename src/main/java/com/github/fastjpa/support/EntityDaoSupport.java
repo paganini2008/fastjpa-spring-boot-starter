@@ -1,24 +1,8 @@
-/**
- * Copyright 2017-2025 Fred Feng (paganini.fy@gmail.com)
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
 package com.github.fastjpa.support;
 
 import static com.github.fastjpa.Model.ROOT;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.persistence.Tuple;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -33,12 +17,15 @@ import com.github.fastjpa.Model;
 import com.github.fastjpa.Property;
 import com.github.paganini2008.devtools.converter.ConvertUtils;
 import com.github.paganini2008.devtools.jdbc.ResultSetSlice;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.persistence.Tuple;
 
 /**
  * 
  * @Description: EntityDaoSupport
  * @Author: Fred Feng
- * @Date: 08/01/2025
+ * @Date: 18/03/2025
  * @Version 1.0.0
  */
 public abstract class EntityDaoSupport<E, ID> extends JpaDaoSupport<E, ID>

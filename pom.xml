@@ -31,23 +31,25 @@
 		<developerConnection>https://github.com/paganini2008/fastjpa-spring-boot-starter.git</developerConnection>
 		<url>https://github.com/paganini2008/fastjpa-spring-boot-starter</url>
 	</scm>
-
+	
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>17</java.version>
-	</properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <springboot.version>3.4.3</springboot.version>
+        <java.version>17</java.version>
+    </properties>
 
 	<dependencies>
-		<dependency>
-            <groupId>com.github.paganini2008.doodler</groupId>
-            <artifactId>doodler-common-data</artifactId>
-        </dependency>
 	
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
+		
+		<dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
 		
 		<dependency>
 			<groupId>com.github.paganini2008</groupId>
@@ -94,9 +96,9 @@
 	<dependencyManagement>
 		<dependencies>
             <dependency>
-                <groupId>com.github.paganini2008.doodler</groupId>
-			    <artifactId>doodler-framework-dependencies</artifactId>
-			    <version>1.0.0-SNAPSHOT</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${springboot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

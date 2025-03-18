@@ -1,36 +1,40 @@
 /**
- * Copyright 2017-2025 Fred Feng (paganini.fy@gmail.com)
+ * Copyright 2017-2021 Fred Feng (paganini.fy@gmail.com)
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.github.fastjpa.support;
 
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
+
 import org.springframework.data.jpa.repository.query.QueryUtils;
+
 import com.github.paganini2008.devtools.jdbc.ResultSetSlice;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 
 /**
  * 
- * @Description: NativeQueryResultSetSlice
- * @Author: Fred Feng
- * @Date: 08/01/2025
- * @Version 1.0.0
+ * NativeQueryResultSetSlice
+ *
+ * @author Fred Feng
+ * @since 2.0.1
  */
 @SuppressWarnings("all")
 public class NativeQueryResultSetSlice<E> implements ResultSetSlice<E> {
 
-    public NativeQueryResultSetSlice(String sql, Object[] arguments, Class<E> entityClass,
-            EntityManager em) {
+    public NativeQueryResultSetSlice(String sql, Object[] arguments, Class<E> entityClass, EntityManager em) {
         this.sql = sql;
         this.arguments = arguments;
         this.em = em;
@@ -43,8 +47,7 @@ public class NativeQueryResultSetSlice<E> implements ResultSetSlice<E> {
     private final Class<E> entityClass;
 
     public List<E> list(int maxResults, int firstResult) {
-        Query query = entityClass != null ? em.createNativeQuery(sql, entityClass)
-                : em.createNativeQuery(sql);
+        Query query = entityClass != null ? em.createNativeQuery(sql, entityClass) : em.createNativeQuery(sql);
         if (arguments != null && arguments.length > 0) {
             int index = 1;
             for (Object arg : arguments) {
