@@ -6,7 +6,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.util.ClassUtils;
-import com.github.fastjpa.example.User;
 
 /**
  * 
@@ -104,10 +103,7 @@ public class LambdaUtils {
     }
 
     public static void main(String[] args) {
-        LambdaInfo info = inspect(User::getActivated);
-        System.out.println(info.getAttributeName());
-        System.out.println(info.getClassName());
-        System.out.println(info.getAttributeType());
+
     }
 
 }

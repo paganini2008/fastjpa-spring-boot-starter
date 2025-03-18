@@ -5,11 +5,10 @@ import com.github.fastjpa.support.BeanReflection;
 
 /**
  * 
- * BeanPropertyTransformer
- * 
- * @author Fred Feng
- *
- * @since 2.0.1
+ * @Description: BeanPropertyTransformer
+ * @Author: Fred Feng
+ * @Date: 18/03/2025
+ * @Version 1.0.0
  */
 public class BeanPropertyTransformer<T, R> extends AbstractTransformer<T, R> {
 
