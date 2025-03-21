@@ -289,7 +289,7 @@ public abstract class Restrictions {
         return eq(Property.forName(alias, attributeName), subQuery);
     }
 
-    public static <X, T> LogicalFilter eq(SerializedFunction<X, ?> sf,
+    public static <X, T> LogicalFilter eq(SerializedFunction<X, T> sf,
             SubQueryBuilder<T> subQuery) {
         return eq(Property.forName(sf), subQuery);
     }
@@ -351,7 +351,7 @@ public abstract class Restrictions {
 
     public static LogicalFilter like(Field<String> field, String pattern, char escapeChar) {
         return create(field, (model, expression, builder) -> {
-            return builder.like(expression, pattern, escapeChar);
+            return builder.like(expression, "%" + pattern + "%", escapeChar);
         });
     }
 
@@ -389,7 +389,7 @@ public abstract class Restrictions {
 
     public static LogicalFilter like(Field<String> field, String pattern) {
         return create(field, (model, expression, builder) -> {
-            return builder.like(expression, pattern);
+            return builder.like(expression, "%" + pattern + "%");
         });
     }
 

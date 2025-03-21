@@ -2,7 +2,7 @@
 package com.github.fastjpa;
 
 import java.util.List;
-import com.github.paganini2008.devtools.jdbc.ResultSetSlice;
+import com.github.fastjpa.page.PageableQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
 
 /**
@@ -28,12 +28,12 @@ public class JpaGroupPageResultSet<T> implements JpaPageResultSet<T> {
     }
 
     @Override
-    public List<T> list(int maxResults, int firstResult) {
+    public List<T> list(int maxResults, long firstResult) {
         return customQuery.getResultList(builder -> query, maxResults, firstResult);
     }
 
     @Override
-    public int rowCount() {
+    public long rowCount() {
         List<Long> list = customQuery.getResultList(builder -> {
             counter.select(builder.count(builder.toInteger(builder.literal(1))));
             return counter;
@@ -42,9 +42,8 @@ public class JpaGroupPageResultSet<T> implements JpaPageResultSet<T> {
     }
 
     @Override
-    public <R> ResultSetSlice<R> setTransformer(Transformer<T, R> transformer) {
-        return new JpaGroupPageResultSetSlice<T, R>(model, query, counter, customQuery,
-                transformer);
+    public <R> PageableQuery<R> setTransformer(Transformer<T, R> transformer) {
+        return new JpaGroupPageableQueryImpl<T, R>(model, query, counter, customQuery, transformer);
     }
 
 }

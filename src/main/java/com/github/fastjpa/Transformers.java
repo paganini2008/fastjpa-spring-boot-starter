@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import com.github.paganini2008.devtools.collection.CaseInsensitiveMap;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import jakarta.persistence.criteria.Selection;
 
 /**
@@ -87,7 +87,7 @@ public abstract class Transformers {
 
         @Override
         protected Map<String, Object> createObject(Model<?> model, int selectionSize, T original) {
-            return caseInsensitive ? new CaseInsensitiveMap<>(new LinkedHashMap<>(selectionSize))
+            return caseInsensitive ? new LinkedCaseInsensitiveMap<>()
                     : new LinkedHashMap<>(selectionSize);
         }
 
@@ -101,11 +101,10 @@ public abstract class Transformers {
 
     /**
      * 
-     * ListTransformer
-     * 
-     * @author Fred Feng
-     *
-     * @since 2.0.1
+     * @Description: ListTransformer
+     * @Author: Fred Feng
+     * @Date: 21/03/2025
+     * @Version 1.0.0
      */
     public static class ListTransformer<T> extends AbstractTransformer<T, List<Object>> {
 

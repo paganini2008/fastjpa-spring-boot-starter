@@ -14,23 +14,12 @@ public interface JpaGroupBy<E, T> {
 
     JpaGroupBy<E, T> having(Filter filter);
 
-    default JpaQueryResultSet<T> select(String... attributeNames) {
-        return select(new ColumnList().addColumns(attributeNames));
-    }
-
-    default JpaQueryResultSet<T> select(String alias, String[] attributeNames) {
-        return select(new ColumnList().addColumns(alias, attributeNames));
-    }
-
-    default JpaQueryResultSet<T> select(Column... columns) {
-        return select(new ColumnList(columns));
-    }
-
-    default JpaQueryResultSet<T> select(Field<?>... fields) {
-        return select(new ColumnList().addColumns(fields));
-    }
-
     JpaQueryResultSet<T> select(ColumnList columnList);
+
+    default JpaGroupBy<E, T> orderBy(int number, boolean asc) {
+        return sort(asc ? JpaSort.asc(Fields.toInteger(number))
+                : JpaSort.desc(Fields.toInteger(number)));
+    }
 
     JpaGroupBy<E, T> sort(JpaSort... sorts);
 

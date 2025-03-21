@@ -6,19 +6,19 @@ import java.util.Optional;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.springframework.data.jpa.repository.query.QueryUtils;
-import com.github.paganini2008.devtools.jdbc.ResultSetSlice;
+import com.github.fastjpa.page.PageableQuery;
 import jakarta.persistence.EntityManager;
 
 /**
  * 
- * @Description: HibernateNativeQueryResultSetSlice
+ * @Description: HibernateNativeQueryPaginator
  * @Author: Fred Feng
  * @Date: 18/03/2025
  * @Version 1.0.0
  */
-public class HibernateNativeQueryResultSetSlice<T> implements ResultSetSlice<T> {
+public class HibernateNativeQueryPaginator<T> implements PageableQuery<T> {
 
-    HibernateNativeQueryResultSetSlice(String sql, Object[] arguments, EntityManager em,
+    HibernateNativeQueryPaginator(String sql, Object[] arguments, EntityManager em,
             QueryResultSetExtractor<T> queryResultSetExtractor) {
         this.sql = sql;
         this.arguments = arguments;
@@ -32,7 +32,7 @@ public class HibernateNativeQueryResultSetSlice<T> implements ResultSetSlice<T> 
     private final QueryResultSetExtractor<T> queryResultSetExtractor;
 
     @Override
-    public List<T> list(int maxResults, int firstResult) {
+    public List<T> list(int maxResults, long firstResult) {
         Session session = em.unwrap(Session.class);
         NativeQuery<?> query = session.createNativeQuery(sql);
         if (arguments != null && arguments.length > 0) {
@@ -42,7 +42,7 @@ public class HibernateNativeQueryResultSetSlice<T> implements ResultSetSlice<T> 
             }
         }
         if (firstResult >= 0) {
-            query.setFirstResult(firstResult);
+            query.setFirstResult((int) firstResult);
         }
         if (maxResults > 0) {
             query.setMaxResults(maxResults);
@@ -51,7 +51,7 @@ public class HibernateNativeQueryResultSetSlice<T> implements ResultSetSlice<T> 
     }
 
     @Override
-    public int rowCount() {
+    public long rowCount() {
         Session session = em.unwrap(Session.class);
         NativeQuery<?> query = session.createNativeQuery(getCountQuerySqlString(sql));
         if (arguments != null && arguments.length > 0) {

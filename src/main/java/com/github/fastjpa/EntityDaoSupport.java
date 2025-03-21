@@ -1,4 +1,4 @@
-package com.github.fastjpa.support;
+package com.github.fastjpa;
 
 import static com.github.fastjpa.Model.ROOT;
 import java.util.List;
@@ -6,19 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import com.github.fastjpa.Fields;
-import com.github.fastjpa.Filter;
-import com.github.fastjpa.JpaDaoSupport;
-import com.github.fastjpa.JpaDelete;
-import com.github.fastjpa.JpaPage;
-import com.github.fastjpa.JpaQuery;
-import com.github.fastjpa.JpaUpdate;
-import com.github.fastjpa.Model;
-import com.github.fastjpa.Property;
-import com.github.paganini2008.devtools.converter.ConvertUtils;
-import com.github.paganini2008.devtools.jdbc.ResultSetSlice;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
 
 /**
@@ -37,42 +25,6 @@ public abstract class EntityDaoSupport<E, ID> extends JpaDaoSupport<E, ID>
     }
 
     protected final Class<E> entityClass;
-
-    @Override
-    public ResultSetSlice<E> select(String sql, Object[] arguments) {
-        return new NativeQueryResultSetSlice<E>(sql, arguments, entityClass, em);
-    }
-
-    @Override
-    public <T> T getSingleResult(String sql, Object[] arguments, Class<T> requiredType) {
-        return execute(sql, arguments, query -> {
-            Object result = query.getSingleResult();
-            try {
-                return result != null ? requiredType.cast(result) : null;
-            } catch (ClassCastException e) {
-                return (T) ConvertUtils.convertValue(result, requiredType);
-            }
-        });
-    }
-
-    @Override
-    public int executeUpdate(String sql, Object[] arguments) {
-        return execute(sql, arguments, query -> {
-            return query.executeUpdate();
-        });
-    }
-
-    @Override
-    public <T> T execute(String sql, Object[] arguments, ResultSetExtractor<T> extractor) {
-        Query query = em.createNativeQuery(sql);
-        if (arguments != null && arguments.length > 0) {
-            int index = 1;
-            for (Object arg : arguments) {
-                query.setParameter(index++, arg);
-            }
-        }
-        return extractor.extractData(query);
-    }
 
     @Override
     public boolean exists(Filter filter) {
@@ -121,9 +73,9 @@ public abstract class EntityDaoSupport<E, ID> extends JpaDaoSupport<E, ID>
     }
 
     @Override
-    public <T extends Number> T avg(String attributeName, Filter filter, Class<T> requiredType) {
-        Property<T> property = Property.forName(attributeName, requiredType);
-        return query(requiredType).filter(filter).one(Fields.avg(property));
+    public Double avg(String attributeName, Filter filter) {
+        Property<Double> property = Property.forName(attributeName);
+        return query(Double.class).filter(filter).one(Fields.avg(property));
     }
 
     @Override
@@ -166,18 +118,18 @@ public abstract class EntityDaoSupport<E, ID> extends JpaDaoSupport<E, ID>
     }
 
     @Override
-    public JpaPage<E, E> select() {
-        return select(entityClass, ROOT, entityClass);
+    public JpaPage<E, E> paginate() {
+        return paginate(entityClass, ROOT, entityClass);
     }
 
     @Override
-    public <T> JpaPage<E, T> select(Class<T> resultClass) {
-        return select(entityClass, ROOT, resultClass);
+    public <T> JpaPage<E, T> paginate(Class<T> resultClass) {
+        return paginate(entityClass, ROOT, resultClass);
     }
 
     @Override
-    public JpaPage<E, Tuple> multiselect() {
-        return select(entityClass, ROOT);
+    public JpaPage<E, Tuple> multiPaginate() {
+        return paginate(entityClass, ROOT);
     }
 
     public Class<E> getEntityClass() {

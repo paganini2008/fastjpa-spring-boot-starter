@@ -1,7 +1,7 @@
 package com.github.fastjpa;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * 
@@ -17,44 +17,45 @@ public class ColumnList extends ArrayList<Column> {
     public ColumnList() {}
 
     public ColumnList(Column... columns) {
-        addAll(Arrays.asList(columns));
+        super(List.of(columns));
     }
 
-    public ColumnList addColumn(String attributeName) {
-        add(Column.forName(attributeName));
-        return this;
-    }
-
-    public ColumnList addColumns(String[] attributeNames) {
+    public ColumnList(String[] attributeNames) {
         if (attributeNames != null && attributeNames.length > 0) {
             for (String attributeName : attributeNames) {
                 add(Column.forName(attributeName));
             }
         }
-        return this;
     }
 
-    public ColumnList addColumn(String alias, String attributeName) {
-        add(Column.forName(alias, attributeName));
-        return this;
+    @SafeVarargs
+    public <X> ColumnList(SerializedFunction<X, ?>... functions) {
+        if (functions != null && functions.length > 0) {
+            for (SerializedFunction<X, ?> function : functions) {
+                addColumn(function);
+            }
+        }
     }
 
-    public ColumnList addColumns(String alias, String[] attributeNames) {
+    @SafeVarargs
+    public ColumnList(Field<?>... fields) {
+        if (fields != null && fields.length > 0) {
+            for (Field<?> field : fields) {
+                addColumn(field, field.toString());
+            }
+        }
+    }
+
+    public ColumnList(String alias, String[] attributeNames) {
         if (attributeNames != null && attributeNames.length > 0) {
             for (String attributeName : attributeNames) {
                 add(Column.forName(alias, attributeName));
             }
         }
-        return this;
     }
 
-    public <X> ColumnList addColumns(
-            @SuppressWarnings("unchecked") SerializedFunction<X, ?>... functions) {
-        if (functions != null && functions.length > 0) {
-            for (SerializedFunction<X, ?> function : functions) {
-                add(Column.forName(function, null));
-            }
-        }
+    public ColumnList addColumn(String attributeName) {
+        add(Column.forName(attributeName));
         return this;
     }
 
@@ -68,12 +69,18 @@ public class ColumnList extends ArrayList<Column> {
         return this;
     }
 
-    public ColumnList addColumns(Field<?>... fields) {
-        if (fields != null && fields.length > 0) {
-            for (Field<?> field : fields) {
-                addColumn(field, field.toString());
-            }
-        }
+    public ColumnList addColumn(String alias, String attributeName) {
+        add(Column.forName(alias, attributeName));
+        return this;
+    }
+
+    public ColumnList addColumn(Column column) {
+        add(column);
+        return this;
+    }
+
+    public <X> ColumnList addColumn(SerializedFunction<X, ?> function) {
+        add(Column.forName(function, null));
         return this;
     }
 

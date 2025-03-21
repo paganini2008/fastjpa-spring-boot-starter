@@ -16,5 +16,5 @@ public interface JpaCustomQuery<X> {
 
     <T> List<T> getResultList(JpaQueryCallback<T> callback);
 
-    <T> List<T> getResultList(JpaQueryCallback<T> callback, int limit, int offset);
+    <T> List<T> getResultList(JpaQueryCallback<T> callback, int maxResults, long firstResult);
 }

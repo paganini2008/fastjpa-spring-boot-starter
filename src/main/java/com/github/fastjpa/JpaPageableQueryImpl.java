@@ -1,32 +1,20 @@
-/**
- * Copyright 2017-2021 Fred Feng (paganini.fy@gmail.com)
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
+
 package com.github.fastjpa;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.github.paganini2008.devtools.jdbc.ResultSetSlice;
+import com.github.fastjpa.page.PageableQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Selection;
 
 /**
  * 
- * @Description: JpaPageResultSetSlice
+ * @Description: JpaPageableQueryImpl
  * @Author: Fred Feng
  * @Date: 18/03/2025
  * @Version 1.0.0
  */
-public class JpaPageResultSetSlice<T, R> implements ResultSetSlice<R> {
+public class JpaPageableQueryImpl<T, R> implements PageableQuery<R> {
 
     private final Model<?> model;
     private final CriteriaQuery<T> query;
@@ -34,7 +22,7 @@ public class JpaPageResultSetSlice<T, R> implements ResultSetSlice<R> {
     private final JpaCustomQuery<?> customQuery;
     private final Transformer<T, R> transformer;
 
-    JpaPageResultSetSlice(Model<?> model, CriteriaQuery<T> query, CriteriaQuery<Long> counter,
+    JpaPageableQueryImpl(Model<?> model, CriteriaQuery<T> query, CriteriaQuery<Long> counter,
             JpaCustomQuery<?> customQuery, Transformer<T, R> transformer) {
         this.model = model;
         this.query = query;
@@ -44,16 +32,16 @@ public class JpaPageResultSetSlice<T, R> implements ResultSetSlice<R> {
     }
 
     @Override
-    public int rowCount() {
+    public long rowCount() {
         Long result = customQuery.getSingleResult(builder -> {
             counter.select(builder.count(builder.toInteger(builder.literal(1))));
             return counter;
         });
-        return result != null ? result.intValue() : 0;
+        return result != null ? result.longValue() : 0;
     }
 
     @Override
-    public List<R> list(int maxResults, int firstResult) {
+    public List<R> list(int maxResults, long firstResult) {
         List<R> results = new ArrayList<R>();
         List<T> list = customQuery.getResultList(builder -> query, maxResults, firstResult);
         if (query.getResultType() == model.getRootType()) {

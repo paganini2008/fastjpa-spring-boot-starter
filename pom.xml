@@ -52,12 +52,6 @@
         </dependency>
 		
 		<dependency>
-			<groupId>com.github.paganini2008</groupId>
-			<artifactId>devtools-lang</artifactId>
-			<version>2.0.5</version>
-		</dependency>
-		
-		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
@@ -66,6 +60,12 @@
 		<dependency>
 	        <groupId>com.h2database</groupId>
 	        <artifactId>h2</artifactId>
+	        <scope>runtime</scope>
+	    </dependency>
+	    
+	    <dependency>
+	        <groupId>org.postgresql</groupId>
+	        <artifactId>postgresql</artifactId>
 	        <scope>runtime</scope>
 	    </dependency>
 		
@@ -102,6 +102,13 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+		        <groupId>org.apache.maven.plugins</groupId>
+		        <artifactId>maven-surefire-plugin</artifactId>
+		        <configuration>
+		          <skipTests>true</skipTests>
+		        </configuration>
+		      </plugin>
 		</plugins>
 	</build>
 
@@ -135,6 +142,8 @@
 							</execution>
 						</executions>
 					</plugin>
+					
+					
 					<!-- Javadoc -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>

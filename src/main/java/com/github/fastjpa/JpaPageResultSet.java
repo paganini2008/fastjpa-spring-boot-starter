@@ -1,7 +1,8 @@
 
 package com.github.fastjpa;
 
-import com.github.paganini2008.devtools.jdbc.ResultSetSlice;
+import com.github.fastjpa.page.Countable;
+import com.github.fastjpa.page.PageableQuery;
 
 /**
  * 
@@ -10,8 +11,8 @@ import com.github.paganini2008.devtools.jdbc.ResultSetSlice;
  * @Date: 18/03/2025
  * @Version 1.0.0
  */
-public interface JpaPageResultSet<T> extends ResultSetSlice<T> {
+public interface JpaPageResultSet<T> extends ListableQuery<T>, Countable {
 
-    <R> ResultSetSlice<R> setTransformer(Transformer<T, R> transformer);
+    <R> PageableQuery<R> setTransformer(Transformer<T, R> transformer);
 
 }

@@ -12,10 +12,25 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
+/**
+ * 
+ * @Description: Product
+ * @Author: Fred Feng
+ * @Date: 19/03/2025
+ * @Version 1.0.0
+ */
 @DynamicInsert
 @Entity
 @Table(name = "example_product")
+@NoArgsConstructor
+@Getter
+@Setter
+@ToString(exclude = "orderProducts")
 public class Product {
 
     @Id
@@ -40,60 +55,13 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderProduct> orderProducts;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
+    public Product(String name, BigDecimal price, BigDecimal discount, LocalDate produceDate,
+            String location) {
         this.name = name;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
         this.price = price;
-    }
-
-    public BigDecimal getDiscount() {
-        return discount;
-    }
-
-    public void setDiscount(BigDecimal discount) {
         this.discount = discount;
-    }
-
-    public LocalDate getProduceDate() {
-        return produceDate;
-    }
-
-    public void setProduceDate(LocalDate produceDate) {
         this.produceDate = produceDate;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
         this.location = location;
-    }
-
-    public List<OrderProduct> getOrderProducts() {
-        return orderProducts;
-    }
-
-    public void setOrderProducts(List<OrderProduct> orderProducts) {
-        this.orderProducts = orderProducts;
     }
 
 }

@@ -22,7 +22,7 @@ public interface JpaSort {
         return asc(Property.forName(alias, attributeName));
     }
 
-    static <X, Y> JpaSort asc(SerializedFunction<X, Y> sf) {
+    static <X> JpaSort asc(SerializedFunction<X, ?> sf) {
         return asc(Property.forName(sf));
     }
 
@@ -43,8 +43,8 @@ public interface JpaSort {
         return desc(Property.forName(alias, attributeName));
     }
 
-    static <X, Y> JpaSort desc(SerializedFunction<X, Y> sf) {
-        return asc(Property.forName(sf));
+    static <X> JpaSort desc(SerializedFunction<X, ?> sf) {
+        return desc(Property.forName(sf));
     }
 
     static JpaSort desc(Field<?> field) {

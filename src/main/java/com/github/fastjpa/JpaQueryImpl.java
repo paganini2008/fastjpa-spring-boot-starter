@@ -2,9 +2,7 @@ package com.github.fastjpa;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.github.paganini2008.devtools.ArrayUtils;
-
+import org.apache.commons.lang3.ArrayUtils;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
@@ -22,7 +20,8 @@ import jakarta.persistence.criteria.Subquery;
  */
 public class JpaQueryImpl<E, T> implements JpaQuery<E, T> {
 
-    JpaQueryImpl(Model<E> model, CriteriaQuery<T> query, CriteriaBuilder builder, JpaCustomQuery<?> customQuery) {
+    JpaQueryImpl(Model<E> model, CriteriaQuery<T> query, CriteriaBuilder builder,
+            JpaCustomQuery<?> customQuery) {
         this.model = model;
         this.query = query;
         this.builder = builder;
@@ -61,7 +60,8 @@ public class JpaQueryImpl<E, T> implements JpaQuery<E, T> {
     }
 
     @Override
-    public <X, Y> JpaSubQuery<X, Y> subQuery(Class<X> entityClass, String alias, Class<Y> resultClass) {
+    public <X, Y> JpaSubQuery<X, Y> subQuery(Class<X> entityClass, String alias,
+            Class<Y> resultClass) {
         Subquery<Y> subquery = query.subquery(resultClass);
         Root<X> root = subquery.from(entityClass);
         Model<X> model = this.model.sibling(Model.forRoot(root, alias));
@@ -126,19 +126,22 @@ public class JpaQueryImpl<E, T> implements JpaQuery<E, T> {
 
     @Override
     public <X> JpaQuery<X, T> join(String attributeName, String alias, Filter on) {
-        Model<X> join = model.join(attributeName, alias, on != null ? on.toPredicate(model, builder) : null);
+        Model<X> join = model.join(attributeName, alias,
+                on != null ? on.toPredicate(model, builder) : null);
         return new JpaQueryImpl<X, T>(join, query, builder, customQuery);
     }
 
     @Override
     public <X> JpaQuery<X, T> leftJoin(String attributeName, String alias, Filter on) {
-        Model<X> join = model.leftJoin(attributeName, alias, on != null ? on.toPredicate(model, builder) : null);
+        Model<X> join = model.leftJoin(attributeName, alias,
+                on != null ? on.toPredicate(model, builder) : null);
         return new JpaQueryImpl<X, T>(join, query, builder, customQuery);
     }
 
     @Override
     public <X> JpaQuery<X, T> rightJoin(String attributeName, String alias, Filter on) {
-        Model<X> join = model.rightJoin(attributeName, alias, on != null ? on.toPredicate(model, builder) : null);
+        Model<X> join = model.rightJoin(attributeName, alias,
+                on != null ? on.toPredicate(model, builder) : null);
         return new JpaQueryImpl<X, T>(join, query, builder, customQuery);
     }
 

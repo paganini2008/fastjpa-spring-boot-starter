@@ -2,10 +2,8 @@ package com.github.fastjpa;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.github.paganini2008.devtools.ArrayUtils;
-import com.github.paganini2008.devtools.StringUtils;
-
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Path;
@@ -65,8 +63,8 @@ public class JoinModel<X, Y> implements Model<Y> {
 
     @Override
     public boolean hasAttribute(String name, String attributeName) {
-        return this.alias.equals(name) && StringUtils.isNotBlank(attributeName) ? true : model.hasAttribute(name,
-                attributeName);
+        return this.alias.equals(name) && StringUtils.isNotBlank(attributeName) ? true
+                : model.hasAttribute(name, attributeName);
     }
 
     @Override
@@ -117,7 +115,8 @@ public class JoinModel<X, Y> implements Model<Y> {
     public List<JpaAttributeDetail> getAttributeDetails(String alias) {
         if (this.alias.equals(alias)) {
             List<JpaAttributeDetail> details = new ArrayList<JpaAttributeDetail>();
-            for (SingularAttribute<? super Y, ?> attribute : getEntityType().getSingularAttributes()) {
+            for (SingularAttribute<? super Y, ?> attribute : getEntityType()
+                    .getSingularAttributes()) {
                 details.add(new JpaAttributeDetailImpl<>(attribute));
             }
             return details;

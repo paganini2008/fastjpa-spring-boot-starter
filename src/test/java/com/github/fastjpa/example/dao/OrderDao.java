@@ -1,7 +1,7 @@
 package com.github.fastjpa.example.dao;
 
+import com.github.fastjpa.EntityDao;
 import com.github.fastjpa.example.entity.Order;
-import com.github.fastjpa.support.EntityDao;
 
 /**
  * 

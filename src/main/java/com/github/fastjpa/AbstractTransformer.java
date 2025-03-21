@@ -2,7 +2,6 @@
 package com.github.fastjpa;
 
 import java.util.List;
-import com.github.paganini2008.devtools.beans.PropertyUtils;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.Selection;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +35,7 @@ public abstract class AbstractTransformer<T, R> implements Transformer<T, R> {
                 }
             }
         }
-        afterTransferring(model, original, destination);
+        afterTransformation(model, original, destination);
         return destination;
     }
 
@@ -77,7 +76,7 @@ public abstract class AbstractTransformer<T, R> implements Transformer<T, R> {
                 }
             }
         }
-        afterTransferring(model, original, destination);
+        afterTransformation(model, original, destination);
         return destination;
     }
 
@@ -95,6 +94,6 @@ public abstract class AbstractTransformer<T, R> implements Transformer<T, R> {
 
     protected abstract R createObject(Model<?> model, int selectionSize, T original);
 
-    protected void afterTransferring(Model<?> model, T value, R object) {}
+    protected void afterTransformation(Model<?> model, T value, R object) {}
 
 }

@@ -16,8 +16,34 @@ public class FieldList extends ArrayList<Field<?>> {
 
     public FieldList() {}
 
+    @SafeVarargs
     public FieldList(Field<?>... fields) {
-        addAll(List.of(fields));
+        super(List.of(fields));
+    }
+
+    @SafeVarargs
+    public <E> FieldList(SerializedFunction<E, ?>... functions) {
+        if (functions != null && functions.length > 0) {
+            for (SerializedFunction<E, ?> function : functions) {
+                add(Property.forName(function));
+            }
+        }
+    }
+
+    public FieldList(String... attributeNames) {
+        if (attributeNames != null && attributeNames.length > 0) {
+            for (String attributeName : attributeNames) {
+                add(Property.forName(attributeName));
+            }
+        }
+    }
+
+    public FieldList(String alias, String[] attributeNames) {
+        if (attributeNames != null && attributeNames.length > 0) {
+            for (String attributeName : attributeNames) {
+                add(Property.forName(alias, attributeName));
+            }
+        }
     }
 
     public FieldList addField(String attributeName) {
@@ -25,26 +51,8 @@ public class FieldList extends ArrayList<Field<?>> {
         return this;
     }
 
-    public FieldList addFields(String[] attributeNames) {
-        if (attributeNames != null && attributeNames.length > 0) {
-            for (String attributeName : attributeNames) {
-                add(Property.forName(attributeName));
-            }
-        }
-        return this;
-    }
-
     public FieldList addField(String alias, String attributeName) {
         add(Property.forName(alias, attributeName));
-        return this;
-    }
-
-    public FieldList addFields(String alias, String[] attributeNames) {
-        if (attributeNames != null && attributeNames.length > 0) {
-            for (String attributeName : attributeNames) {
-                add(Property.forName(alias, attributeName));
-            }
-        }
         return this;
     }
 
@@ -58,13 +66,13 @@ public class FieldList extends ArrayList<Field<?>> {
         return this;
     }
 
-    public <E> FieldList addField(
-            @SuppressWarnings("unchecked") SerializedFunction<E, ?>... sFuns) {
-        if (sFuns != null && sFuns.length > 0) {
-            for (SerializedFunction<E, ?> sFun : sFuns) {
-                add(Property.forName(sFun));
-            }
-        }
+    public FieldList addField(Field<?> field) {
+        add(field);
+        return this;
+    }
+
+    public <E> FieldList addField(SerializedFunction<E, ?> function) {
+        add(Property.forName(function));
         return this;
     }
 

@@ -2,10 +2,8 @@ package com.github.fastjpa;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.github.paganini2008.devtools.ArrayUtils;
-import com.github.paganini2008.devtools.StringUtils;
-
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Path;

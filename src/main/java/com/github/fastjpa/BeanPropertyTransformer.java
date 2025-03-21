@@ -1,7 +1,10 @@
 
 package com.github.fastjpa;
 
-import com.github.fastjpa.support.BeanReflection;
+import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 
 /**
  * 
@@ -12,30 +15,43 @@ import com.github.fastjpa.support.BeanReflection;
  */
 public class BeanPropertyTransformer<T, R> extends AbstractTransformer<T, R> {
 
+    private static final Logger log = LoggerFactory.getLogger(BeanPropertyTransformer.class);
+
     public BeanPropertyTransformer(Class<R> resultClass, String[] includedProperties,
             TransformerPostHandler<T, R> postHandler) {
-        this.beanReflection = new BeanReflection<R>(resultClass, includedProperties);
+        this.resultClass = resultClass;
+        this.includedProperties = includedProperties;
         this.postHandler = postHandler;
     }
 
-    private final BeanReflection<R> beanReflection;
+    private final Class<R> resultClass;
+    private final String[] includedProperties;
     private final TransformerPostHandler<T, R> postHandler;
 
     @Override
     protected void writeValue(Model<?> model, String attributeName, Class<?> attributeType,
             Object attributeValue, R destination) {
-        beanReflection.setProperty(destination, attributeName, attributeValue);
+        if (includedProperties == null || ArrayUtils.contains(includedProperties, attributeName)) {
+            try {
+                PropertyUtils.setProperty(destination, attributeName, attributeValue);
+            } catch (Exception e) {
+                if (log.isWarnEnabled()) {
+                    log.warn("Failed to assign value to attribute name '{}' due to reason: {}",
+                            attributeName, e.getMessage());
+                }
+            }
+        }
     }
 
     @Override
     protected R createObject(Model<?> model, int selectionSize, T original) {
-        return beanReflection.instantiateBean();
+        return BeanUtils.instantiateClass(resultClass);
     }
 
     @Override
-    protected final void afterTransferring(Model<?> model, T original, R destination) {
+    protected final void afterTransformation(Model<?> model, T original, R destination) {
         if (postHandler != null) {
-            postHandler.handleAfterTransferring(model, original, destination);
+            postHandler.handleAfterTransformation(model, original, destination);
         }
     }
 

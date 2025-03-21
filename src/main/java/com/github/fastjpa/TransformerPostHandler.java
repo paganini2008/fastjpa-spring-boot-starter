@@ -11,6 +11,6 @@ package com.github.fastjpa;
 @FunctionalInterface
 public interface TransformerPostHandler<T, R> {
 
-    void handleAfterTransferring(Model<?> model, T original, R destination);
+    void handleAfterTransformation(Model<?> model, T original, R destination);
 
 }

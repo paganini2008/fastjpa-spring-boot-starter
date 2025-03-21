@@ -12,20 +12,20 @@ import jakarta.persistence.criteria.Predicate;
  */
 public class AndFilter extends LogicalFilter {
 
-    private final Filter filter;
+    private final Filter leftFilter;
 
-    private final Filter otherFilter;
+    private final Filter rightFilter;
 
-    public AndFilter(Filter filter, Filter otherFilter) {
-        this.filter = filter;
-        this.otherFilter = otherFilter;
+    public AndFilter(Filter leftFilter, Filter rightFilter) {
+        this.leftFilter = leftFilter;
+        this.rightFilter = rightFilter;
     }
 
     @Override
     public Predicate toPredicate(Model<?> model, CriteriaBuilder builder) {
-        Predicate left = filter.toPredicate(model, builder);
-        Predicate right = otherFilter.toPredicate(model, builder);
-        return builder.and(new Predicate[]{left, right});
+        Predicate leftPredicate = leftFilter.toPredicate(model, builder);
+        Predicate rightPredicate = rightFilter.toPredicate(model, builder);
+        return builder.and(leftPredicate, rightPredicate);
     }
 
 }

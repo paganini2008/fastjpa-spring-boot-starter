@@ -1,5 +1,5 @@
 
-package com.github.fastjpa.support;
+package com.github.fastjpa;
 
 import java.util.List;
 import java.util.Optional;
@@ -8,11 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.support.JpaRepositoryImplementation;
 import org.springframework.data.repository.NoRepositoryBean;
-import com.github.fastjpa.Filter;
-import com.github.fastjpa.JpaDelete;
-import com.github.fastjpa.JpaPage;
-import com.github.fastjpa.JpaQuery;
-import com.github.fastjpa.JpaUpdate;
 import jakarta.persistence.Tuple;
 
 /**
@@ -23,8 +18,7 @@ import jakarta.persistence.Tuple;
  * @Version 1.0.0
  */
 @NoRepositoryBean
-public interface EntityDao<E, ID>
-        extends JpaRepositoryImplementation<E, ID>, NativeSqlOperations<E> {
+public interface EntityDao<E, ID> extends JpaRepositoryImplementation<E, ID> {
 
     Class<E> getEntityClass();
 
@@ -44,7 +38,7 @@ public interface EntityDao<E, ID>
 
     <T extends Comparable<T>> T min(String property, Filter filter, Class<T> requiredType);
 
-    <T extends Number> T avg(String property, Filter filter, Class<T> requiredType);
+    Double avg(String property, Filter filter);
 
     <T extends Number> T sum(String property, Filter filter, Class<T> requiredType);
 
@@ -58,10 +52,10 @@ public interface EntityDao<E, ID>
 
     JpaQuery<E, Tuple> multiquery();
 
-    JpaPage<E, E> select();
+    JpaPage<E, E> paginate();
 
-    <T> JpaPage<E, T> select(Class<T> resultClass);
+    <T> JpaPage<E, T> paginate(Class<T> resultClass);
 
-    JpaPage<E, Tuple> multiselect();
+    JpaPage<E, Tuple> multiPaginate();
 
 }

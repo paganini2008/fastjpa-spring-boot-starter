@@ -53,12 +53,12 @@ public final class Property<T> implements Field<T> {
         return new Property<T>(alias, attributeName, requiredType);
     }
 
-    public static <X, T> Property<T> forName(SerializedFunction<X, T> sf) {
+    public static <E, T> Property<T> forName(SerializedFunction<E, T> sf) {
         return forName(sf, null);
     }
 
     @SuppressWarnings("unchecked")
-    public static <X, T> Property<T> forName(SerializedFunction<X, ?> sf, Class<T> requiredType) {
+    public static <E, T> Property<T> forName(SerializedFunction<E, ?> sf, Class<T> requiredType) {
         LambdaInfo info = LambdaUtils.inspect(sf);
         String alias = TableAlias.get(info.getClassName());
         return new Property<T>(alias, info.getAttributeName(),
