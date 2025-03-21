@@ -1,12 +1,13 @@
 package com.github.fastjpa;
 
 import java.util.List;
-
+import java.util.Optional;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Selection;
 import jakarta.persistence.metamodel.EntityType;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 /**
  * 
@@ -47,9 +48,30 @@ public interface Model<X> {
 
     List<JpaAttributeDetail> getAttributeDetails(String alias);
 
+    default <Y> Model<Y> join(Class<Y> joinClass, String alias, Predicate on) {
+        Optional<SingularAttribute<? super X, ?>> optional = getEntityType().getSingularAttributes()
+                .stream().filter(sa -> sa.getJavaType().equals(joinClass)).findFirst();
+        String attributeName = optional.get().getName();
+        return join(attributeName, alias, on);
+    }
+
     <Y> Model<Y> join(String attributeName, String alias, Predicate on);
 
+    default <Y> Model<Y> leftJoin(Class<Y> joinClass, String alias, Predicate on) {
+        Optional<SingularAttribute<? super X, ?>> optional = getEntityType().getSingularAttributes()
+                .stream().filter(sa -> sa.getJavaType().equals(joinClass)).findFirst();
+        String attributeName = optional.get().getName();
+        return leftJoin(attributeName, alias, on);
+    }
+
     <Y> Model<Y> leftJoin(String attributeName, String alias, Predicate on);
+
+    default <Y> Model<Y> rightJoin(Class<Y> joinClass, String alias, Predicate on) {
+        Optional<SingularAttribute<? super X, ?>> optional = getEntityType().getSingularAttributes()
+                .stream().filter(sa -> sa.getJavaType().equals(joinClass)).findFirst();
+        String attributeName = optional.get().getName();
+        return rightJoin(attributeName, alias, on);
+    }
 
     <Y> Model<Y> rightJoin(String attributeName, String alias, Predicate on);
 

@@ -124,6 +124,8 @@ public class JpaQueryImpl<E, T> implements JpaQuery<E, T> {
         return this;
     }
 
+
+
     @Override
     public <X> JpaQuery<X, T> join(String attributeName, String alias, Filter on) {
         Model<X> join = model.join(attributeName, alias,

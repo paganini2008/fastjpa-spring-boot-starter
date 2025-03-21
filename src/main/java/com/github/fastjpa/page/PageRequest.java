@@ -5,7 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 /**
- * @Description: SimplePageRequest
+ * @Description: PageRequest
  * @Author: Fred Feng
  * @Date: 08/03/2023
  * @Version 1.0.0
@@ -32,8 +32,7 @@ public class PageRequest extends AbstractPageRequest {
     }
 
     public Pageable previous() {
-        return getPageNumber() == 1 ? this
-                : new PageRequest(getPageNumber() - 1, getPageSize());
+        return getPageNumber() == 1 ? this : new PageRequest(getPageNumber() - 1, getPageSize());
     }
 
     public Pageable first() {

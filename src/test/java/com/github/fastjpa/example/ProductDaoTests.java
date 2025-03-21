@@ -114,7 +114,7 @@ public class ProductDaoTests {
     @Order(3)
     @Test
     public void test3() {
-        productDao.multiquery().groupBy(new FieldList(Product::getLocation))
+        productDao.queryForTuple().groupBy(new FieldList(Product::getLocation))
                 .sort(JpaSort.desc(Fields.avg(Product::getPrice)))
                 .select(new ColumnList(Product::getLocation)
                         .addColumn(Fields.max(Product::getPrice), "maxPrice")
@@ -130,7 +130,7 @@ public class ProductDaoTests {
     @Order(4)
     @Test
     public void test4() {
-        productDao.multiquery().groupBy(new FieldList(Product::getLocation))
+        productDao.queryForTuple().groupBy(new FieldList(Product::getLocation))
                 .having(Restrictions.gt(Fields.avg(Product::getPrice), 50d))
                 // .sort(JpaSort.desc(Fields.avg(Product::getPrice)))
                 .orderBy(4, false)
@@ -151,7 +151,7 @@ public class ProductDaoTests {
         ColumnList columnList = new ColumnList();
         columnList.addColumn(Fields.concat(Fields.concat(Fields.max("price", String.class), "/"),
                 Fields.min("price", String.class)), "repr").addColumn("location");
-        productDao.multiquery().groupBy("location").select(columnList)
+        productDao.queryForTuple().groupBy("location").select(columnList)
                 .setTransformer(Transformers.asBean(ProductAggregationVo.class)).list()
                 .forEach(vo -> {
                     System.out.println(vo);
@@ -164,7 +164,7 @@ public class ProductDaoTests {
         ColumnList columnList = new ColumnList()
                 .addColumn(Function.build("LOWER", String.class, Product::getName), "name")
                 .addColumn(Function.build("UPPER", String.class, Product::getLocation), "location");
-        productDao.multiquery().select(columnList).list(10).forEach(t -> {
+        productDao.queryForTuple().select(columnList).list(10).forEach(t -> {
             System.out.println(t.toString());
         });
     }
@@ -180,7 +180,7 @@ public class ProductDaoTests {
                 .when("New Zealand", "Oceania").otherwise("Other");
         ColumnList columnList =
                 new ColumnList().addColumn(ifExpression, "area").addColumn(Product::getLocation);
-        productDao.multiquery().select(columnList).list().forEach(t -> {
+        productDao.queryForTuple().select(columnList).list().forEach(t -> {
             System.out.println(t.toString());
         });
     }

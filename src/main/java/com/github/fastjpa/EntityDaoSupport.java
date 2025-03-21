@@ -113,7 +113,7 @@ public abstract class EntityDaoSupport<E, ID> extends JpaDaoSupport<E, ID>
     }
 
     @Override
-    public JpaQuery<E, Tuple> multiquery() {
+    public JpaQuery<E, Tuple> queryForTuple() {
         return query(entityClass, ROOT);
     }
 
@@ -128,7 +128,7 @@ public abstract class EntityDaoSupport<E, ID> extends JpaDaoSupport<E, ID>
     }
 
     @Override
-    public JpaPage<E, Tuple> multiPaginate() {
+    public JpaPage<E, Tuple> paginateForTuple() {
         return paginate(entityClass, ROOT);
     }
 

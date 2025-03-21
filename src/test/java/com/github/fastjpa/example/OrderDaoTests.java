@@ -80,7 +80,9 @@ public class OrderDaoTests {
     @Order(1)
     @Test
     public void test1() {
-
+        // PageResponse<Tuple> pageResponse = orderDao.paginateForTuple().l.leftJoin("product", "p")
+        // .filter(Restrictions.gte("p", "price", 50)).sort(JpaSort.desc("createTime"))
+        // .selectAlias("p").list(PageRequest.of(10));
     }
 
     @AfterAll
