@@ -1,27 +1,15 @@
-/**
- * Copyright 2017-2025 Fred Feng (paganini.fy@gmail.com)
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
+
 package com.github.fastjpa;
 
 import java.util.List;
-import javax.persistence.criteria.CriteriaQuery;
-import com.github.paganini2008.devtools.jdbc.ResultSetSlice;
+import com.github.fastjpa.page.PageableQuery;
+import jakarta.persistence.criteria.CriteriaQuery;
 
 /**
  * 
  * @Description: JpaPageResultSetImpl
  * @Author: Fred Feng
- * @Date: 08/01/2025
+ * @Date: 20/03/2025
  * @Version 1.0.0
  */
 public class JpaPageResultSetImpl<T> implements JpaPageResultSet<T> {
@@ -40,12 +28,12 @@ public class JpaPageResultSetImpl<T> implements JpaPageResultSet<T> {
     }
 
     @Override
-    public List<T> list(int maxResults, int firstResult) {
+    public List<T> list(int maxResults, long firstResult) {
         return customQuery.getResultList(builder -> query, maxResults, firstResult);
     }
 
     @Override
-    public int rowCount() {
+    public long rowCount() throws Exception {
         Long result = customQuery.getSingleResult(builder -> {
             counter.select(builder.count(builder.toInteger(builder.literal(1))));
             return counter;
@@ -54,8 +42,8 @@ public class JpaPageResultSetImpl<T> implements JpaPageResultSet<T> {
     }
 
     @Override
-    public <R> ResultSetSlice<R> setTransformer(Transformer<T, R> transformer) {
-        return new JpaPageResultSetSlice<T, R>(model, query, counter, customQuery, transformer);
+    public <R> PageableQuery<R> setTransformer(Transformer<T, R> transformer) {
+        return new JpaPageableQueryImpl<T, R>(model, query, counter, customQuery, transformer);
     }
 
 }

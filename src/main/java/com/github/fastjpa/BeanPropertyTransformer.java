@@ -1,53 +1,57 @@
-/**
- * Copyright 2017-2025 Fred Feng (paganini.fy@gmail.com)
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
+
 package com.github.fastjpa;
 
-import com.github.fastjpa.support.BeanReflection;
+import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 
 /**
  * 
  * @Description: BeanPropertyTransformer
  * @Author: Fred Feng
- * @Date: 08/01/2025
+ * @Date: 18/03/2025
  * @Version 1.0.0
  */
 public class BeanPropertyTransformer<T, R> extends AbstractTransformer<T, R> {
 
+    private static final Logger log = LoggerFactory.getLogger(BeanPropertyTransformer.class);
+
     public BeanPropertyTransformer(Class<R> resultClass, String[] includedProperties,
             TransformerPostHandler<T, R> postHandler) {
-        this.beanReflection = new BeanReflection<R>(resultClass, includedProperties);
+        this.resultClass = resultClass;
+        this.includedProperties = includedProperties;
         this.postHandler = postHandler;
     }
 
-    private final BeanReflection<R> beanReflection;
+    private final Class<R> resultClass;
+    private final String[] includedProperties;
     private final TransformerPostHandler<T, R> postHandler;
 
     @Override
     protected void writeValue(Model<?> model, String attributeName, Class<?> attributeType,
             Object attributeValue, R destination) {
-        beanReflection.setProperty(destination, attributeName, attributeValue);
+        if (includedProperties == null || ArrayUtils.contains(includedProperties, attributeName)) {
+            try {
+                PropertyUtils.setProperty(destination, attributeName, attributeValue);
+            } catch (Exception e) {
+                if (log.isWarnEnabled()) {
+                    log.warn("Failed to assign value to attribute name '{}' due to reason: {}",
+                            attributeName, e.getMessage());
+                }
+            }
+        }
     }
 
     @Override
     protected R createObject(Model<?> model, int selectionSize, T original) {
-        return beanReflection.instantiateBean();
+        return BeanUtils.instantiateClass(resultClass);
     }
 
     @Override
-    protected final void afterTransferring(Model<?> model, T original, R destination) {
+    protected final void afterTransformation(Model<?> model, T original, R destination) {
         if (postHandler != null) {
-            postHandler.handleAfterTransferring(model, original, destination);
+            postHandler.handleAfterTransformation(model, original, destination);
         }
     }
 

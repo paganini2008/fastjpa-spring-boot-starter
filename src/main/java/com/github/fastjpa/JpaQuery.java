@@ -1,20 +1,7 @@
-/**
- * Copyright 2017-2025 Fred Feng (paganini.fy@gmail.com)
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
 package com.github.fastjpa;
 
-import javax.persistence.criteria.CriteriaQuery;
 import com.github.fastjpa.LambdaUtils.LambdaInfo;
+import jakarta.persistence.criteria.CriteriaQuery;
 
 /**
  * 
@@ -27,14 +14,18 @@ public interface JpaQuery<E, T> {
 
     JpaQuery<E, T> filter(Filter filter);
 
+    default JpaQuery<E, T> orderBy(SerializedFunction<E, ?> sf, boolean asc) {
+        return sort(asc ? JpaSort.asc(sf) : JpaSort.desc(sf));
+    }
+
     JpaQuery<E, T> sort(JpaSort... sorts);
 
     default JpaGroupBy<E, T> groupBy(String... attributeNames) {
-        return groupBy(new FieldList().addFields(attributeNames));
+        return groupBy(new FieldList(attributeNames));
     }
 
     default JpaGroupBy<E, T> groupBy(String alias, String[] attributeNames) {
-        return groupBy(new FieldList().addFields(alias, attributeNames));
+        return groupBy(new FieldList(alias, attributeNames));
     }
 
     default JpaGroupBy<E, T> groupBy(Field<?>... fields) {
@@ -46,22 +37,6 @@ public interface JpaQuery<E, T> {
     JpaQueryResultSet<T> selectThis();
 
     JpaQueryResultSet<T> selectAlias(String... tableAliases);
-
-    default JpaQueryResultSet<T> select(String... attributeNames) {
-        return select(new ColumnList().addColumns(attributeNames));
-    }
-
-    default JpaQueryResultSet<T> select(String alias, String[] attributeNames) {
-        return select(new ColumnList().addColumns(alias, attributeNames));
-    }
-
-    default JpaQueryResultSet<T> select(Column... columns) {
-        return select(new ColumnList(columns));
-    }
-
-    default JpaQueryResultSet<T> select(Field<?>... fields) {
-        return select(new ColumnList().addColumns(fields));
-    }
 
     JpaQueryResultSet<T> select(ColumnList columnList);
 

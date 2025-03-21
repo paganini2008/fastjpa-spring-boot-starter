@@ -1,5 +1,5 @@
 /**
- * Copyright 2017-2025 Fred Feng (paganini.fy@gmail.com)
+ * Copyright 2017-2021 Fred Feng (paganini.fy@gmail.com)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,28 +13,42 @@
  */
 package com.github.fastjpa.support;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 
 /**
  * 
  * @Description: BeanPropertyRowMapper
  * @Author: Fred Feng
- * @Date: 08/01/2025
+ * @Date: 20/03/2025
  * @Version 1.0.0
  */
 public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
-    private final BeanReflection<T> beanReflection;
-
     public BeanPropertyRowMapper(Class<T> resultClass, String... includedProperties) {
-        this.beanReflection = new BeanReflection<T>(resultClass, includedProperties);
+        this.resultClass = resultClass;
+        this.includedPropertyNames = includedProperties != null && includedProperties.length > 0
+                ? Set.of(includedProperties)
+                : Collections.emptySet();
     }
 
+    private final Class<T> resultClass;
+    private final Set<String> includedPropertyNames;
+
     public T mapRow(int index, Map<String, Object> data) {
-        T instance = beanReflection.instantiateBean();
-        for (String propertyName : data.keySet()) {
-            beanReflection.setProperty(instance, propertyName, data.get(propertyName));
+        Map<String, Object> copy = new LinkedHashMap<String, Object>(data);
+        BeanWrapper beanWrapper = new BeanWrapperImpl(resultClass);
+        if (includedPropertyNames.size() > 0) {
+            copy = copy.entrySet().stream()
+                    .filter(entry -> includedPropertyNames.contains(entry.getKey()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
-        return instance;
+        beanWrapper.setPropertyValues(copy);
+        return resultClass.cast(beanWrapper.getWrappedInstance());
     }
 }
