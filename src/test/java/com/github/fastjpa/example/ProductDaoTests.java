@@ -19,9 +19,12 @@ import org.springframework.test.context.ContextConfiguration;
 import com.github.fastjpa.ColumnList;
 import com.github.fastjpa.FieldList;
 import com.github.fastjpa.Fields;
+import com.github.fastjpa.Function;
+import com.github.fastjpa.IfExpression;
 import com.github.fastjpa.JpaSort;
 import com.github.fastjpa.LambdaFilter;
 import com.github.fastjpa.Restrictions;
+import com.github.fastjpa.Transformers;
 import com.github.fastjpa.example.dao.ProductDao;
 import com.github.fastjpa.example.entity.Product;
 import lombok.Getter;
@@ -111,15 +114,15 @@ public class ProductDaoTests {
     @Order(3)
     @Test
     public void test3() {
-        productDao.query(ProductAggregationVo.class).groupBy(new FieldList(Product::getLocation))
+        productDao.multiquery().groupBy(new FieldList(Product::getLocation))
                 .sort(JpaSort.desc(Fields.avg(Product::getPrice)))
                 .select(new ColumnList(Product::getLocation)
                         .addColumn(Fields.max(Product::getPrice), "maxPrice")
                         .addColumn(Fields.min(Product::getPrice), "minPrice")
                         .addColumn(Fields.avg(Product::getPrice), "avgPrice")
                         .addColumn(Fields.count(1), "amount"))
-
-                .list().forEach(vo -> {
+                .setTransformer(Transformers.asBean(ProductAggregationVo.class)).list()
+                .forEach(vo -> {
                     System.out.println(vo);
                 });
     }
@@ -127,7 +130,7 @@ public class ProductDaoTests {
     @Order(4)
     @Test
     public void test4() {
-        productDao.query(ProductAggregationVo.class).groupBy(new FieldList(Product::getLocation))
+        productDao.multiquery().groupBy(new FieldList(Product::getLocation))
                 .having(Restrictions.gt(Fields.avg(Product::getPrice), 50d))
                 // .sort(JpaSort.desc(Fields.avg(Product::getPrice)))
                 .orderBy(4, false)
@@ -136,16 +139,56 @@ public class ProductDaoTests {
                         .addColumn(Fields.min(Product::getPrice), "minPrice")
                         .addColumn(Fields.avg(Product::getPrice), "avgPrice")
                         .addColumn(Fields.count(1), "amount"))
-
-                .list().forEach(vo -> {
+                .setTransformer(Transformers.asBean(ProductAggregationVo.class)).list()
+                .forEach(vo -> {
                     System.out.println(vo);
                 });
+    }
+
+    @Order(5)
+    @Test
+    public void test5() {
+        ColumnList columnList = new ColumnList();
+        columnList.addColumn(Fields.concat(Fields.concat(Fields.max("price", String.class), "/"),
+                Fields.min("price", String.class)), "repr").addColumn("location");
+        productDao.multiquery().groupBy("location").select(columnList)
+                .setTransformer(Transformers.asBean(ProductAggregationVo.class)).list()
+                .forEach(vo -> {
+                    System.out.println(vo);
+                });
+    }
+
+    @Order(6)
+    @Test
+    public void test6() {
+        ColumnList columnList = new ColumnList()
+                .addColumn(Function.build("LOWER", String.class, Product::getName), "name")
+                .addColumn(Function.build("UPPER", String.class, Product::getLocation), "location");
+        productDao.multiquery().select(columnList).list(10).forEach(t -> {
+            System.out.println(t.toString());
+        });
+    }
+
+    @Order(7)
+    @Test
+    public void test7() {
+        IfExpression<String, String> ifExpression =
+                new IfExpression<String, String>(Product::getLocation);
+        ifExpression = ifExpression.when("Indonesia", "Asia").when("Japan", "Asia")
+                .when("China", "Asia").when("Singapore", "Asia").when("Vietnam", "Asia")
+                .when("Thailand", "Asia").when("Australia", "Oceania")
+                .when("New Zealand", "Oceania").otherwise("Other");
+        ColumnList columnList =
+                new ColumnList().addColumn(ifExpression, "area").addColumn(Product::getLocation);
+        productDao.multiquery().select(columnList).list().forEach(t -> {
+            System.out.println(t.toString());
+        });
     }
 
     @AfterAll
     @Commit
     public void end() {
-        productDao.deleteAll();
+        // productDao.deleteAll();
     }
 
     @Getter
@@ -170,6 +213,16 @@ public class ProductDaoTests {
         private BigDecimal maxPrice;
         private BigDecimal avgPrice;
         private Long amount;
+        private String repr;
+    }
+
+    @Getter
+    @Setter
+    @ToString
+    public static class AreaVo {
+
+        private String area;
+        private Long count;
     }
 
 }

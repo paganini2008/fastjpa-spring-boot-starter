@@ -43,11 +43,11 @@ public class JpaQueryImpl<E, T> implements JpaQuery<E, T> {
 
     @Override
     public JpaGroupBy<E, T> groupBy(FieldList fieldList) {
-        List<Expression<?>> paths = new ArrayList<Expression<?>>();
+        List<Expression<?>> expressions = new ArrayList<Expression<?>>();
         for (Field<?> field : fieldList) {
-            paths.add(field.toExpression(model, builder));
+            expressions.add(field.toExpression(model, builder));
         }
-        query.groupBy(paths);
+        query.groupBy(expressions);
         return new JpaGroupByImpl<E, T>(model, query, builder, customQuery);
     }
 

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 import com.github.fastjpa.ColumnList;
+import com.github.fastjpa.LambdaFilter;
 import com.github.fastjpa.example.dao.OrderDao;
 import com.github.fastjpa.example.dao.OrderProductDao;
 import com.github.fastjpa.example.dao.UserDao;
@@ -52,7 +53,8 @@ public class UserDaoTests {
 
     @Test
     public void testGetUserByUsernameAndPassword() {
-        User user = userDao.query().eq(User::getUsername, "Jack").eq(User::getPassword, "123456")
+        User user = userDao.query().filter(
+                new LambdaFilter().eq(User::getUsername, "Jack").eq(User::getPassword, "123456"))
                 .selectThis().first();
         log.info("Load user: {}", user);
         assertTrue(user != null);
@@ -61,7 +63,7 @@ public class UserDaoTests {
     @ParameterizedTest
     @ValueSource(strings = {"scott003", "lee004"})
     public void testGetUserByEmail(String email) {
-        User user = userDao.query().like(User::getEmail, email)
+        User user = userDao.query().filter(new LambdaFilter().like(User::getEmail, email))
                 .select(new ColumnList(User::getUsername, User::getPassword)).first();
         log.info("Load user: {}", user);
         assertTrue(user != null);
@@ -70,7 +72,7 @@ public class UserDaoTests {
     @ParameterizedTest
     @ValueSource(strings = {"abc009"})
     public void testGetUserNotFoundByEmail(String email) {
-        User user = userDao.query().like(User::getEmail, email)
+        User user = userDao.query().filter(new LambdaFilter().like(User::getEmail, email))
                 .select(new ColumnList(User::getUsername, User::getPassword)).first();
         log.info("Load user: {}", user);
         assertTrue(user == null);

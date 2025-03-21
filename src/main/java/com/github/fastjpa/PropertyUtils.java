@@ -57,7 +57,7 @@ public abstract class PropertyUtils {
                     attributeValue = convertValueWithTargetType(conversionService, attributeValue,
                             pd.getPropertyType());
                 }
-                method.invoke(attributeValue);
+                method.invoke(object, attributeValue);
             } else {
                 java.lang.reflect.Field field =
                         ReflectionUtils.findField(targetClass, attributeName);
@@ -69,6 +69,7 @@ public abstract class PropertyUtils {
                 field.set(object, attributeValue);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             throw new PropertyAccessException(e.getMessage(), e);
         }
     }

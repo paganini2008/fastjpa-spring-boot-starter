@@ -39,7 +39,7 @@ public abstract class Transformers {
 
     public static <T, R> Transformer<T, R> asBean(Class<R> resultClass,
             TransformerPostHandler<T, R> postHandler) {
-        return asBean(resultClass, new String[0], postHandler);
+        return asBean(resultClass, null, postHandler);
     }
 
     public static <T, R> Transformer<T, R> asBean(Class<R> resultClass, String[] includedProperties,

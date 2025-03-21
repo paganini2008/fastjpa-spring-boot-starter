@@ -2,7 +2,6 @@ package com.github.fastjpa;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaBuilder.SimpleCase;
 import jakarta.persistence.criteria.Expression;
@@ -29,6 +28,10 @@ public class IfExpression<T, R> implements Field<R> {
 
     public IfExpression(String alias, String attributeName) {
         this(Property.forName(alias, attributeName));
+    }
+
+    public <X> IfExpression(SerializedFunction<X, T> function) {
+        this.field = Property.forName(function);
     }
 
     public IfExpression(Field<T> field) {
@@ -66,7 +69,8 @@ public class IfExpression<T, R> implements Field<R> {
             if (result != null) {
                 theCase = theCase.when(conditions.get(i), result);
             } else if (resultFields.get(i) != null) {
-                theCase = theCase.when(conditions.get(i), resultFields.get(i).toExpression(model, builder));
+                theCase = theCase.when(conditions.get(i),
+                        resultFields.get(i).toExpression(model, builder));
             }
         }
         if (defaultResult != null) {
