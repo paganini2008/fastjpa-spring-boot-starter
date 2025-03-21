@@ -185,6 +185,20 @@ public class ProductDaoTests {
         });
     }
 
+    // @Order(8)
+    // @Test
+    // public void test8() {
+    // CaseWhenExpression<String> caseWhen = new CaseWhenExpression<String>();
+    // caseWhen.when(Fields.eq(Product::getLocation, "Australia"), "Australia").otherwise("Other");
+    // ColumnList columnList =
+    // new ColumnList().addColumn(caseWhen.as("area")).addColumn(Fields.count(1), "n");
+    // productDao.multiquery().groupBy(caseWhen).select(columnList).list().forEach(t -> {
+    // System.out.println(t.toString());
+    // });
+    // }
+
+
+
     @AfterAll
     @Commit
     public void end() {

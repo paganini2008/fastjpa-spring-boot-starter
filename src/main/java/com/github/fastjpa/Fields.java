@@ -898,7 +898,106 @@ public abstract class Fields {
                 return "upper(" + field.toString() + ")";
             }
         };
+    }
 
+    public static <X, T> Field<Boolean> eq(SerializedFunction<X, T> function, T value) {
+        return eq(Property.forName(function), value);
+    }
+
+    public static <T> Field<Boolean> eq(Field<T> field, T value) {
+
+        return new Field<Boolean>() {
+
+            public Expression<Boolean> toExpression(Model<?> model, CriteriaBuilder builder) {
+                Expression<T> expression = field.toExpression(model, builder);
+                return builder.equal(expression, value);
+            }
+
+        };
+    }
+
+    public static <X, T> Field<Boolean> ne(SerializedFunction<X, T> function, T value) {
+        return ne(Property.forName(function), value);
+    }
+
+    public static <T> Field<Boolean> ne(Field<T> field, T value) {
+
+        return new Field<Boolean>() {
+
+            public Expression<Boolean> toExpression(Model<?> model, CriteriaBuilder builder) {
+                Expression<T> expression = field.toExpression(model, builder);
+                return builder.notEqual(expression, value);
+            }
+
+        };
+    }
+
+    public static <X, T extends Comparable<T>> Field<Boolean> lt(SerializedFunction<X, T> function,
+            T value) {
+        return lt(Property.forName(function), value);
+    }
+
+    public static <T extends Comparable<T>> Field<Boolean> lt(Field<T> field, T value) {
+
+        return new Field<Boolean>() {
+
+            public Expression<Boolean> toExpression(Model<?> model, CriteriaBuilder builder) {
+                Expression<T> expression = field.toExpression(model, builder);
+                return builder.lessThan(expression, value);
+            }
+
+        };
+    }
+
+    public static <X, T extends Comparable<T>> Field<Boolean> lte(SerializedFunction<X, T> function,
+            T value) {
+        return lte(Property.forName(function), value);
+    }
+
+    public static <T extends Comparable<T>> Field<Boolean> lte(Field<T> field, T value) {
+
+        return new Field<Boolean>() {
+
+            public Expression<Boolean> toExpression(Model<?> model, CriteriaBuilder builder) {
+                Expression<T> expression = field.toExpression(model, builder);
+                return builder.lessThanOrEqualTo(expression, value);
+            }
+
+        };
+    }
+
+    public static <X, T extends Comparable<T>> Field<Boolean> gt(SerializedFunction<X, T> function,
+            T value) {
+        return gt(Property.forName(function), value);
+    }
+
+    public static <T extends Comparable<T>> Field<Boolean> gt(Field<T> field, T value) {
+
+        return new Field<Boolean>() {
+
+            public Expression<Boolean> toExpression(Model<?> model, CriteriaBuilder builder) {
+                Expression<T> expression = field.toExpression(model, builder);
+                return builder.greaterThan(expression, value);
+            }
+
+        };
+    }
+
+    public static <X, T extends Comparable<T>> Field<Boolean> gte(SerializedFunction<X, T> function,
+            T value) {
+        return gte(Property.forName(function), value);
+    }
+
+    public static <T extends Comparable<T>> Field<Boolean> gte(Field<T> field, T value) {
+
+        return new Field<Boolean>() {
+
+            public Expression<Boolean> toExpression(Model<?> model, CriteriaBuilder builder) {
+                Expression<T> expression = field.toExpression(model, builder);
+                return builder.greaterThanOrEqualTo(expression, value);
+            }
+
+        };
     }
 
 }

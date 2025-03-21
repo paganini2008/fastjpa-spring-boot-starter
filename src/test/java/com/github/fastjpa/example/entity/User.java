@@ -40,6 +40,10 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders;
 
+    public User(Long id) {
+        this.id = id;
+    }
+
     public User(String username, String password, String email) {
         this.username = username;
         this.password = password;

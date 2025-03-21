@@ -15,8 +15,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 import com.github.fastjpa.ColumnList;
 import com.github.fastjpa.LambdaFilter;
-import com.github.fastjpa.example.dao.OrderDao;
-import com.github.fastjpa.example.dao.OrderProductDao;
 import com.github.fastjpa.example.dao.UserDao;
 import com.github.fastjpa.example.entity.User;
 
@@ -30,14 +28,6 @@ public class UserDaoTests {
 
     @Autowired
     private UserDao userDao;
-
-    @Autowired
-    private OrderDao orderDao;
-
-
-
-    @Autowired
-    private OrderProductDao orderProductDao;
 
     @BeforeAll
     public void init() {
