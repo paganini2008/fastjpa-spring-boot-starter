@@ -1,7 +1,10 @@
 package com.github.fastjpa;
 
 import java.lang.invoke.SerializedLambda;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,7 +21,7 @@ public class LambdaUtils {
 
     private LambdaUtils() {}
 
-    static class LambdaInfo {
+    public static class LambdaInfo {
 
         private String className;
         private String attributeName;
@@ -46,6 +49,12 @@ public class LambdaUtils {
 
         public void setAttributeType(Class<?> attributeType) {
             this.attributeType = attributeType;
+        }
+
+        @Override
+        public String toString() {
+            return "className: " + className + ", attributeName: " + attributeName
+                    + ", attributeType: " + attributeType;
         }
 
     }
@@ -93,17 +102,22 @@ public class LambdaUtils {
     }
 
     private static Class<?> getAttributeType(String className, String attributeName) {
-        Class<?> clz;
+        Field field;
         try {
-            clz = ClassUtils.forName(className, null);
-            return clz.getDeclaredField(attributeName).getType();
+            Class<?> clz = ClassUtils.forName(className, null);
+            field = clz.getDeclaredField(attributeName);
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
-    }
-
-    public static void main(String[] args) {
-
+        Type genericType = field.getGenericType();
+        if (genericType instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) genericType;
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+            if (actualTypeArguments.length > 0) {
+                return (Class<?>) actualTypeArguments[0];
+            }
+        }
+        return field.getType();
     }
 
 }

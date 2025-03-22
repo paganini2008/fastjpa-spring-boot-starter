@@ -50,7 +50,7 @@ public class JpaUpdateImpl<E> implements JpaUpdate<E> {
     }
 
     @Override
-    public <T> JpaUpdate<E> set(String attributeName, Field<T> value) {
+    public <T> JpaUpdate<E> setField(String attributeName, Field<T> value) {
         Path<T> path = model.getAttribute(attributeName);
         update.set(path, value.toExpression(model, builder));
         return this;

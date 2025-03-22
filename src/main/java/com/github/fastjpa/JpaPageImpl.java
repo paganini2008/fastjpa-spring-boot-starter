@@ -1,16 +1,4 @@
-/**
- * Copyright 2017-2021 Fred Feng (paganini.fy@gmail.com)
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
+
 package com.github.fastjpa;
 
 /**
@@ -74,6 +62,27 @@ public class JpaPageImpl<E, T> implements JpaPage<E, T> {
     }
 
     @Override
+    public <X> JpaPage<X, T> join(Class<X> joinClass, String alias, Filter on) {
+        JpaQuery<X, T> joinQuery = query.join(joinClass, alias, on);
+        JpaQuery<X, Long> joinCounter = counter.join(joinClass, alias, on);
+        return new JpaPageImpl<X, T>(joinQuery, joinCounter, customQuery);
+    }
+
+    @Override
+    public <X> JpaPage<X, T> leftJoin(Class<X> joinClass, String alias, Filter on) {
+        JpaQuery<X, T> joinQuery = query.leftJoin(joinClass, alias, on);
+        JpaQuery<X, Long> joinCounter = counter.leftJoin(joinClass, alias, on);
+        return new JpaPageImpl<X, T>(joinQuery, joinCounter, customQuery);
+    }
+
+    @Override
+    public <X> JpaPage<X, T> rightJoin(Class<X> joinClass, String alias, Filter on) {
+        JpaQuery<X, T> joinQuery = query.rightJoin(joinClass, alias, on);
+        JpaQuery<X, Long> joinCounter = counter.rightJoin(joinClass, alias, on);
+        return new JpaPageImpl<X, T>(joinQuery, joinCounter, customQuery);
+    }
+
+    @Override
     public <X> JpaPage<X, T> join(String attributeName, String alias, Filter on) {
         JpaQuery<X, T> joinQuery = query.join(attributeName, alias, on);
         JpaQuery<X, Long> joinCounter = counter.join(attributeName, alias, on);
@@ -91,6 +100,13 @@ public class JpaPageImpl<E, T> implements JpaPage<E, T> {
     public <X> JpaPage<X, T> rightJoin(String attributeName, String alias, Filter on) {
         JpaQuery<X, T> joinQuery = query.rightJoin(attributeName, alias, on);
         JpaQuery<X, Long> joinCounter = counter.rightJoin(attributeName, alias, on);
+        return new JpaPageImpl<X, T>(joinQuery, joinCounter, customQuery);
+    }
+
+    @Override
+    public <X> JpaPage<X, T> crossJoin(Class<X> joinClass, String alias) {
+        JpaQuery<X, T> joinQuery = query.crossJoin(joinClass, alias);
+        JpaQuery<X, Long> joinCounter = counter.crossJoin(joinClass, alias);
         return new JpaPageImpl<X, T>(joinQuery, joinCounter, customQuery);
     }
 

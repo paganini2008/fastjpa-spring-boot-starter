@@ -113,23 +113,23 @@ public abstract class EntityDaoSupport<E, ID> extends JpaDaoSupport<E, ID>
     }
 
     @Override
-    public JpaQuery<E, Tuple> queryForTuple() {
+    public JpaQuery<E, Tuple> customQuery() {
         return query(entityClass, ROOT);
     }
 
     @Override
-    public JpaPage<E, E> paginate() {
-        return paginate(entityClass, ROOT, entityClass);
+    public JpaPage<E, E> page() {
+        return page(entityClass, ROOT, entityClass);
     }
 
     @Override
-    public <T> JpaPage<E, T> paginate(Class<T> resultClass) {
-        return paginate(entityClass, ROOT, resultClass);
+    public <T> JpaPage<E, T> page(Class<T> resultClass) {
+        return page(entityClass, ROOT, resultClass);
     }
 
     @Override
-    public JpaPage<E, Tuple> paginateForTuple() {
-        return paginate(entityClass, ROOT);
+    public JpaPage<E, Tuple> customPage() {
+        return page(entityClass, ROOT);
     }
 
     public Class<E> getEntityClass() {

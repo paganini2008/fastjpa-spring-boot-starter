@@ -13,6 +13,7 @@ import jakarta.persistence.criteria.Selection;
  * @Date: 18/03/2025
  * @Version 1.0.0
  */
+@FunctionalInterface
 public interface Column {
 
     Selection<?> toSelection(Model<?> model, CriteriaBuilder builder);

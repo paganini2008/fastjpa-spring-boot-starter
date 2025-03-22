@@ -7,6 +7,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Selection;
 import jakarta.persistence.metamodel.EntityType;
+import jakarta.persistence.metamodel.Metamodel;
 import jakarta.persistence.metamodel.SingularAttribute;
 
 /**
@@ -29,6 +30,8 @@ public interface Model<X> {
     boolean isManaged(Class<?> type);
 
     Root<?> getRoot();
+
+    Metamodel getMetamodel();
 
     String getAlias();
 

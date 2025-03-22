@@ -1,6 +1,7 @@
 package com.github.fastjpa.page;
 
 import java.util.List;
+import java.util.function.Consumer;
 import org.springframework.data.domain.Page;
 
 /**
@@ -45,5 +46,7 @@ public interface PageResponse<T> extends Iterable<EachPage<T>> {
     PageResponse<T> previousPage();
 
     Page<T> toPage() throws Exception;
+
+    void forEachPage(Consumer<EachPage<T>> consumer);
 
 }

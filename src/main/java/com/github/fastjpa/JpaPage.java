@@ -1,6 +1,8 @@
 
 package com.github.fastjpa;
 
+import com.github.fastjpa.LambdaUtils.LambdaInfo;
+
 /**
  * 
  * @Description: JpaPage
@@ -32,24 +34,43 @@ public interface JpaPage<E, T> {
         return groupBy(new FieldList(fields));
     }
 
+    default JpaPageGroupBy<E, T> groupBy(SerializedFunction<E, ?> function) {
+        return groupBy(new FieldList(function));
+    }
+
     JpaPageGroupBy<E, T> groupBy(FieldList fieldList);
 
-    default <X> JpaPage<X, T> join(String attributeName, String alias) {
-        return join(attributeName, alias, null);
+    default <X> JpaPage<E, T> join(SerializedFunction<X, ?> function, String alias, Filter on) {
+        LambdaInfo info = LambdaUtils.inspect(function);
+        TableAlias.put(info.getAttributeType(), alias);
+        return join(info.getAttributeName(), alias, on);
     }
 
-    default <X> JpaPage<X, T> leftJoin(String attributeName, String alias) {
-        return leftJoin(attributeName, alias, null);
+    default <X> JpaPage<X, T> leftJoin(SerializedFunction<X, ?> function, String alias, Filter on) {
+        LambdaInfo info = LambdaUtils.inspect(function);
+        TableAlias.put(info.getAttributeType(), alias);
+        return leftJoin(info.getAttributeName(), alias, on);
     }
 
-    default <X> JpaPage<X, T> rightJoin(String attributeName, String alias) {
-        return rightJoin(attributeName, alias, null);
+    default <X> JpaPage<E, T> rightJoin(SerializedFunction<X, ?> function, String alias,
+            Filter on) {
+        LambdaInfo info = LambdaUtils.inspect(function);
+        TableAlias.put(info.getAttributeType(), alias);
+        return rightJoin(info.getAttributeName(), alias, on);
     }
+
+    <X> JpaPage<X, T> join(Class<X> joinClass, String alias, Filter on);
 
     <X> JpaPage<X, T> join(String attributeName, String alias, Filter on);
 
+    <X> JpaPage<X, T> leftJoin(Class<X> joinClass, String alias, Filter on);
+
     <X> JpaPage<X, T> leftJoin(String attributeName, String alias, Filter on);
 
+    <X> JpaPage<X, T> rightJoin(Class<X> joinClass, String alias, Filter on);
+
     <X> JpaPage<X, T> rightJoin(String attributeName, String alias, Filter on);
+
+    <X> JpaPage<X, T> crossJoin(Class<X> joinClass, String alias);
 
 }

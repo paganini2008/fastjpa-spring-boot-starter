@@ -3,6 +3,9 @@ package com.github.fastjpa;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 
@@ -697,6 +700,51 @@ public abstract class Fields {
 
     }
 
+    public static Field<LocalDate> localDate() {
+
+        return new Field<LocalDate>() {
+
+            public Expression<LocalDate> toExpression(Model<?> model, CriteriaBuilder builder) {
+                return builder.localDate();
+            }
+
+            public String toString() {
+                return "current_date()";
+            }
+        };
+
+    }
+
+    public static Field<LocalTime> localTime() {
+
+        return new Field<LocalTime>() {
+
+            public Expression<LocalTime> toExpression(Model<?> model, CriteriaBuilder builder) {
+                return builder.localTime();
+            }
+
+            public String toString() {
+                return "current_time()";
+            }
+        };
+
+    }
+
+    public static Field<LocalDateTime> localDateTime() {
+
+        return new Field<LocalDateTime>() {
+
+            public Expression<LocalDateTime> toExpression(Model<?> model, CriteriaBuilder builder) {
+                return builder.localDateTime();
+            }
+
+            public String toString() {
+                return "current_timestamp()";
+            }
+        };
+
+    }
+
     public static Field<String> concat(Field<String> left, Field<String> right) {
         return new Field<String>() {
 
@@ -808,6 +856,26 @@ public abstract class Fields {
 
     }
 
+    public static <X, T extends Number> Field<T> round(SerializedFunction<X, T> function,
+            Integer scale) {
+        return round(Property.forName(function), scale);
+    }
+
+    public static <T extends Number> Field<T> round(Field<T> field, Integer scale) {
+        return new Field<T>() {
+
+            public Expression<T> toExpression(Model<?> model, CriteriaBuilder builder) {
+                Expression<T> expression = field.toExpression(model, builder);
+                return builder.round(expression, scale);
+            }
+
+            public String toString() {
+                return "round(" + field.toString() + "," + scale + ")";
+            }
+        };
+
+    }
+
     public static Field<String> substring(Field<String> field, Field<Integer> anotherField) {
         return new Field<String>() {
 
@@ -913,6 +981,10 @@ public abstract class Fields {
                 return builder.equal(expression, value);
             }
 
+            public String toString() {
+                return field.toString();
+            }
+
         };
     }
 
@@ -927,6 +999,10 @@ public abstract class Fields {
             public Expression<Boolean> toExpression(Model<?> model, CriteriaBuilder builder) {
                 Expression<T> expression = field.toExpression(model, builder);
                 return builder.notEqual(expression, value);
+            }
+
+            public String toString() {
+                return field.toString();
             }
 
         };
@@ -946,6 +1022,10 @@ public abstract class Fields {
                 return builder.lessThan(expression, value);
             }
 
+            public String toString() {
+                return field.toString();
+            }
+
         };
     }
 
@@ -961,6 +1041,10 @@ public abstract class Fields {
             public Expression<Boolean> toExpression(Model<?> model, CriteriaBuilder builder) {
                 Expression<T> expression = field.toExpression(model, builder);
                 return builder.lessThanOrEqualTo(expression, value);
+            }
+
+            public String toString() {
+                return field.toString();
             }
 
         };
@@ -980,6 +1064,10 @@ public abstract class Fields {
                 return builder.greaterThan(expression, value);
             }
 
+            public String toString() {
+                return field.toString();
+            }
+
         };
     }
 
@@ -995,6 +1083,10 @@ public abstract class Fields {
             public Expression<Boolean> toExpression(Model<?> model, CriteriaBuilder builder) {
                 Expression<T> expression = field.toExpression(model, builder);
                 return builder.greaterThanOrEqualTo(expression, value);
+            }
+
+            public String toString() {
+                return field.toString();
             }
 
         };

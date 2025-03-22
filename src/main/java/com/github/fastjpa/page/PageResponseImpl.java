@@ -3,6 +3,7 @@ package com.github.fastjpa.page;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -142,6 +143,18 @@ public class PageResponseImpl<T> implements PageResponse<T>, Serializable {
     @Override
     public Page<T> toPage() throws Exception {
         return new PageImpl<T>(getContent(), pageable, totalRecords);
+    }
+
+    @Override
+    public void forEachPage(Consumer<EachPage<T>> consumer) {
+        Iterator<EachPage<T>> iterator = iterator();
+        EachPage<T> eachPage;
+        while (iterator.hasNext()) {
+            eachPage = iterator.next();
+            if (consumer != null) {
+                consumer.accept(eachPage);
+            }
+        }
     }
 
 }

@@ -104,6 +104,11 @@ public class RootModel<X> implements Model<X> {
     }
 
     @Override
+    public Metamodel getMetamodel() {
+        return metamodel;
+    }
+
+    @Override
     public String getAlias() {
         return alias;
     }

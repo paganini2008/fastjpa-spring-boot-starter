@@ -3,6 +3,7 @@ package com.github.fastjpa.example;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,7 +27,10 @@ import com.github.fastjpa.LambdaFilter;
 import com.github.fastjpa.Restrictions;
 import com.github.fastjpa.Transformers;
 import com.github.fastjpa.example.dao.ProductDao;
+import com.github.fastjpa.example.dao.StockDao;
 import com.github.fastjpa.example.entity.Product;
+import com.github.fastjpa.example.entity.Stock;
+import com.github.fastjpa.page.PageRequest;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -48,6 +52,9 @@ public class ProductDaoTests {
 
     @Autowired
     private ProductDao productDao;
+
+    @Autowired
+    private StockDao stockDao;
 
     @BeforeAll
     @Commit
@@ -77,9 +84,18 @@ public class ProductDaoTests {
                         LocalDate.of(2024, 12, 20), "Thailand"),
                 new Product("Water dispenser", BigDecimal.valueOf(101), BigDecimal.valueOf(0.85),
                         LocalDate.of(2024, 12, 5), "Thailand"));
-        productDao.saveAll(list);
+        list = productDao.saveAll(list);
         log.info("Total products: {}", productDao.count());
-        assertTrue(list.size() == productDao.count());
+
+        List<Stock> stocks = new ArrayList<>();
+        for (Product product : list) {
+            Stock stock = new Stock();
+            stock.setAmount(99999L);
+            stock.setProductId(product.getId());
+            stocks.add(stock);
+        }
+        stockDao.saveAll(stocks);
+        assertTrue(list.size() == productDao.count() && stocks.size() == stockDao.count());
     }
 
     @Order(1)
@@ -88,7 +104,7 @@ public class ProductDaoTests {
         productDao.query(ProductVo.class)
                 .filter(new LambdaFilter().gte(Product::getPrice, BigDecimal.valueOf(100)).and()
                         .notNull(Product::getDiscount))
-                .select(new ColumnList(Product::getName, Product::getPrice).addColumn(
+                .select(new ColumnList(Product::getName, Product::getPrice).addColumns(
                         Fields.multiply(Product::getPrice, Product::getDiscount).as("actualPrice")))
                 .list().forEach(vo -> {
                     System.out.println(vo);
@@ -102,9 +118,9 @@ public class ProductDaoTests {
                 .filter(new LambdaFilter().gte(Product::getPrice, BigDecimal.valueOf(200))
                         .and(() -> new LambdaFilter().eq(Product::getLocation, "Australia").or()
                                 .eq(Product::getLocation, "Thailand")))
-                .orderBy(Product::getPrice, false)
+                .sort(JpaSort.desc(Fields.avg(Product::getPrice)))
                 .select(new ColumnList(Product::getName, Product::getLocation, Product::getPrice)
-                        .addColumn(Fields.multiply(Product::getPrice, Product::getDiscount)
+                        .addColumns(Fields.multiply(Product::getPrice, Product::getDiscount)
                                 .as("actualPrice")))
                 .list().forEach(vo -> {
                     System.out.println(vo);
@@ -114,13 +130,12 @@ public class ProductDaoTests {
     @Order(3)
     @Test
     public void test3() {
-        productDao.queryForTuple().groupBy(new FieldList(Product::getLocation))
+        productDao.customQuery().groupBy(Product::getLocation)
                 .sort(JpaSort.desc(Fields.avg(Product::getPrice)))
-                .select(new ColumnList(Product::getLocation)
-                        .addColumn(Fields.max(Product::getPrice), "maxPrice")
-                        .addColumn(Fields.min(Product::getPrice), "minPrice")
-                        .addColumn(Fields.avg(Product::getPrice), "avgPrice")
-                        .addColumn(Fields.count(1), "amount"))
+                .select(new ColumnList(Product::getLocation).addColumns(
+                        Fields.max(Product::getPrice).as("maxPrice"),
+                        Fields.min(Product::getPrice).as("minPrice"),
+                        Fields.avg(Product::getPrice).as("avgPrice"), Fields.count(1).as("amount")))
                 .setTransformer(Transformers.asBean(ProductAggregationVo.class)).list()
                 .forEach(vo -> {
                     System.out.println(vo);
@@ -130,15 +145,12 @@ public class ProductDaoTests {
     @Order(4)
     @Test
     public void test4() {
-        productDao.queryForTuple().groupBy(new FieldList(Product::getLocation))
-                .having(Restrictions.gt(Fields.avg(Product::getPrice), 50d))
-                // .sort(JpaSort.desc(Fields.avg(Product::getPrice)))
-                .orderBy(4, false)
-                .select(new ColumnList(Product::getLocation)
-                        .addColumn(Fields.max(Product::getPrice), "maxPrice")
-                        .addColumn(Fields.min(Product::getPrice), "minPrice")
-                        .addColumn(Fields.avg(Product::getPrice), "avgPrice")
-                        .addColumn(Fields.count(1), "amount"))
+        productDao.customQuery().groupBy(new FieldList(Product::getLocation))
+                .having(Restrictions.gt(Fields.avg(Product::getPrice), 50d)).orderBy(4, false)
+                .select(new ColumnList(Product::getLocation).addColumns(
+                        Fields.max(Product::getPrice).as("maxPrice"),
+                        Fields.min(Product::getPrice).as("minPrice"),
+                        Fields.avg(Product::getPrice).as("avgPrice"), Fields.count(1).as("amount")))
                 .setTransformer(Transformers.asBean(ProductAggregationVo.class)).list()
                 .forEach(vo -> {
                     System.out.println(vo);
@@ -149,9 +161,11 @@ public class ProductDaoTests {
     @Test
     public void test5() {
         ColumnList columnList = new ColumnList();
-        columnList.addColumn(Fields.concat(Fields.concat(Fields.max("price", String.class), "/"),
-                Fields.min("price", String.class)), "repr").addColumn("location");
-        productDao.queryForTuple().groupBy("location").select(columnList)
+        columnList
+                .addColumns(Fields.concat(Fields.concat(Fields.max("price", String.class), "/"),
+                        Fields.min("price", String.class)).as("repr"))
+                .addColumns(Product::getLocation);
+        productDao.customQuery().groupBy("location").select(columnList)
                 .setTransformer(Transformers.asBean(ProductAggregationVo.class)).list()
                 .forEach(vo -> {
                     System.out.println(vo);
@@ -161,10 +175,10 @@ public class ProductDaoTests {
     @Order(6)
     @Test
     public void test6() {
-        ColumnList columnList = new ColumnList()
-                .addColumn(Function.build("LOWER", String.class, Product::getName), "name")
-                .addColumn(Function.build("UPPER", String.class, Product::getLocation), "location");
-        productDao.queryForTuple().select(columnList).list(10).forEach(t -> {
+        ColumnList columnList = new ColumnList().addColumns(
+                Function.build("LOWER", String.class, Product::getName).as("name"),
+                Function.build("UPPER", String.class, Product::getLocation).as("location"));
+        productDao.customQuery().select(columnList).list(10).forEach(t -> {
             System.out.println(t.toString());
         });
     }
@@ -178,31 +192,38 @@ public class ProductDaoTests {
                 .when("China", "Asia").when("Singapore", "Asia").when("Vietnam", "Asia")
                 .when("Thailand", "Asia").when("Australia", "Oceania")
                 .when("New Zealand", "Oceania").otherwise("Other");
-        ColumnList columnList =
-                new ColumnList().addColumn(ifExpression, "area").addColumn(Product::getLocation);
-        productDao.queryForTuple().select(columnList).list().forEach(t -> {
+        ColumnList columnList = new ColumnList().addColumns(ifExpression.as("area"))
+                .addColumns(Product::getLocation);
+        productDao.customQuery().select(columnList).list().forEach(t -> {
             System.out.println(t.toString());
         });
     }
 
-    // @Order(8)
-    // @Test
-    // public void test8() {
-    // CaseWhenExpression<String> caseWhen = new CaseWhenExpression<String>();
-    // caseWhen.when(Fields.eq(Product::getLocation, "Australia"), "Australia").otherwise("Other");
-    // ColumnList columnList =
-    // new ColumnList().addColumn(caseWhen.as("area")).addColumn(Fields.count(1), "n");
-    // productDao.multiquery().groupBy(caseWhen).select(columnList).list().forEach(t -> {
-    // System.out.println(t.toString());
-    // });
-    // }
 
-
+    @Order(8)
+    @Test
+    public void test8() {
+        productDao.customPage().crossJoin(Stock.class, "a")
+                .filter(new LambdaFilter().eq(Stock::getProductId, Product::getId))
+                .select(new ColumnList().addColumns(Product::getId, Product::getName)
+                        .addColumns(Stock::getAmount))
+                .setTransformer(Transformers.asBean(ProductStockVo.class))
+                .paginate(PageRequest.of(10)).forEachPage(eachPage -> {
+                    System.out.println(String.format(
+                            "====================== Pagination: %s/%s ======================",
+                            eachPage.getPageNumber(), eachPage.getTotalPages()));
+                    eachPage.getContent().forEach(vo -> {
+                        System.out.println(vo.toString());
+                    });
+                    System.out.println();
+                });
+    }
 
     @AfterAll
     @Commit
     public void end() {
         // productDao.deleteAll();
+        // stockDao.deleteAll();
     }
 
     @Getter
@@ -215,6 +236,15 @@ public class ProductDaoTests {
         private BigDecimal price;
         private BigDecimal actualPrice;
 
+    }
+
+    @Getter
+    @Setter
+    @ToString
+    public static class ProductStockVo {
+        private Long id;
+        private String name;
+        private Long amount;
     }
 
     @Getter

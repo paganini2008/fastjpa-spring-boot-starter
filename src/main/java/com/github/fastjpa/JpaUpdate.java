@@ -1,5 +1,7 @@
 package com.github.fastjpa;
 
+import com.github.fastjpa.LambdaUtils.LambdaInfo;
+
 /**
  * 
  * @Description: JpaUpdate
@@ -11,11 +13,21 @@ public interface JpaUpdate<E> extends Executable {
 
     JpaUpdate<E> filter(Filter filter);
 
+    default <T> JpaUpdate<E> set(SerializedFunction<E, T> function, T value) {
+        LambdaInfo lambdaInfo = LambdaUtils.inspect(function);
+        return set(lambdaInfo.getAttributeName(), value);
+    }
+
     <T> JpaUpdate<E> set(String attributeName, T value);
 
     <T> JpaUpdate<E> set(String attributeName, String anotherAttributeName);
 
-    <T> JpaUpdate<E> set(String attributeName, Field<T> value);
+    default <T> JpaUpdate<E> setField(SerializedFunction<E, T> function, Field<T> value) {
+        LambdaInfo lambdaInfo = LambdaUtils.inspect(function);
+        return setField(lambdaInfo.getAttributeName(), value);
+    }
+
+    <T> JpaUpdate<E> setField(String attributeName, Field<T> value);
 
     <X> JpaSubQuery<X, X> subQuery(Class<X> entityClass);
 

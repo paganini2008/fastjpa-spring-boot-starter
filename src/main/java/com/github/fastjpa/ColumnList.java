@@ -2,6 +2,8 @@ package com.github.fastjpa;
 
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Selection;
 
 /**
  * 
@@ -31,18 +33,14 @@ public class ColumnList extends ArrayList<Column> {
     @SafeVarargs
     public <X> ColumnList(SerializedFunction<X, ?>... functions) {
         if (functions != null && functions.length > 0) {
-            for (SerializedFunction<X, ?> function : functions) {
-                addColumn(function);
-            }
+            addColumns(functions);
         }
     }
 
     @SafeVarargs
     public ColumnList(Field<?>... fields) {
         if (fields != null && fields.length > 0) {
-            for (Field<?> field : fields) {
-                addColumn(field, field.toString());
-            }
+            addFields(fields);
         }
     }
 
@@ -74,18 +72,31 @@ public class ColumnList extends ArrayList<Column> {
         return this;
     }
 
-    public ColumnList addColumn(Column column) {
-        add(column);
+    public ColumnList addFields(Field<?>... fields) {
+        addAll(List.of(fields).stream().map(f -> f.as(f.toString())).toList());
         return this;
     }
 
-    public <X> ColumnList addColumn(SerializedFunction<X, ?> function) {
-        add(Column.forName(function, null));
+    public ColumnList addColumns(Column... columns) {
+        addAll(List.of(columns));
         return this;
     }
 
-    public ColumnList addColumn(Field<?> field, String alias) {
-        add(field.as(alias));
+    @SafeVarargs
+    public final <X> ColumnList addColumns(SerializedFunction<X, ?>... functions) {
+        addAll(List.of(functions).stream().map(f -> Column.forName(f, null)).toList());
+        return this;
+    }
+
+    public ColumnList addTableAlias(String... tableAliases) {
+        addAll(List.of(tableAliases).stream().map(ta -> {
+            return new Column() {
+                @Override
+                public Selection<?> toSelection(Model<?> model, CriteriaBuilder builder) {
+                    return model.getSelection(ta);
+                }
+            };
+        }).toList());
         return this;
     }
 

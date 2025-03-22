@@ -12,7 +12,7 @@ import com.github.fastjpa.ListableQuery;
  */
 public interface PageableQuery<T> extends ListableQuery<T>, Countable {
 
-    default PageResponse<T> list(Pageable pageable) {
+    default PageResponse<T> paginate(Pageable pageable) {
         return new PageResponseImpl<T>(pageable, this);
     }
 }

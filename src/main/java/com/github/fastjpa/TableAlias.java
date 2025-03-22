@@ -13,12 +13,13 @@ import java.util.Map;
  */
 public final class TableAlias {
 
-    private static final InheritableThreadLocal<Map<String, String>> cache = new InheritableThreadLocal<Map<String, String>>() {
+    private static final InheritableThreadLocal<Map<String, String>> cache =
+            new InheritableThreadLocal<Map<String, String>>() {
 
-        protected Map<String, String> initialValue() {
-            return new HashMap<>();
-        }
-    };
+                protected Map<String, String> initialValue() {
+                    return new HashMap<>();
+                }
+            };
 
     public static void put(Type type, String alias) {
         cache.get().put(type.getTypeName(), alias);

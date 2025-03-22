@@ -18,7 +18,13 @@ import com.github.fastjpa.LambdaFilter;
 import com.github.fastjpa.example.dao.UserDao;
 import com.github.fastjpa.example.entity.User;
 
-
+/**
+ * 
+ * @Description: UserDaoTests
+ * @Author: Fred Feng
+ * @Date: 22/03/2025
+ * @Version 1.0.0
+ */
 @DataJpaTest
 @ContextConfiguration(classes = JpaConfig.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

@@ -1,6 +1,7 @@
 package com.github.fastjpa;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -22,9 +23,9 @@ public class FieldList extends ArrayList<Field<?>> {
     }
 
     @SafeVarargs
-    public <E> FieldList(SerializedFunction<E, ?>... functions) {
+    public <X> FieldList(SerializedFunction<X, ?>... functions) {
         if (functions != null && functions.length > 0) {
-            for (SerializedFunction<E, ?> function : functions) {
+            for (SerializedFunction<X, ?> function : functions) {
                 add(Property.forName(function));
             }
         }
@@ -66,13 +67,18 @@ public class FieldList extends ArrayList<Field<?>> {
         return this;
     }
 
-    public FieldList addField(Field<?> field) {
-        add(field);
+    public FieldList addFields(Field<?>... fields) {
+        addAll(List.of(fields));
         return this;
     }
 
-    public <E> FieldList addField(SerializedFunction<E, ?> function) {
+    public <X> FieldList addField(SerializedFunction<X, ?> function) {
         add(Property.forName(function));
+        return this;
+    }
+
+    public <X> FieldList addFields(Collection<SerializedFunction<X, ?>> functions) {
+        addAll(functions.stream().map(Property::forName).toList());
         return this;
     }
 

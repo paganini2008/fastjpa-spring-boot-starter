@@ -50,12 +50,12 @@ public interface EntityDao<E, ID> extends JpaRepositoryImplementation<E, ID> {
 
     <T> JpaQuery<E, T> query(Class<T> resultClass);
 
-    JpaQuery<E, Tuple> queryForTuple();
+    JpaQuery<E, Tuple> customQuery();
 
-    JpaPage<E, E> paginate();
+    JpaPage<E, E> page();
 
-    <T> JpaPage<E, T> paginate(Class<T> resultClass);
+    <T> JpaPage<E, T> page(Class<T> resultClass);
 
-    JpaPage<E, Tuple> paginateForTuple();
+    JpaPage<E, Tuple> customPage();
 
 }

@@ -1,7 +1,6 @@
 package com.github.fastjpa;
 
 import java.util.List;
-
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Path;
@@ -9,6 +8,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Selection;
 import jakarta.persistence.metamodel.EntityType;
+import jakarta.persistence.metamodel.Metamodel;
 
 /**
  * 
@@ -49,7 +49,8 @@ public class SiblingModel<X, Y> implements Model<Y> {
 
     @Override
     public boolean hasAttribute(String name, String attributeName) {
-        return sibling.hasAttribute(name, attributeName) ? true : model.hasAttribute(name, attributeName);
+        return sibling.hasAttribute(name, attributeName) ? true
+                : model.hasAttribute(name, attributeName);
     }
 
     @Override
@@ -68,6 +69,11 @@ public class SiblingModel<X, Y> implements Model<Y> {
     @Override
     public Root<?> getRoot() {
         return model.getRoot();
+    }
+
+    @Override
+    public Metamodel getMetamodel() {
+        return model.getMetamodel();
     }
 
     @Override

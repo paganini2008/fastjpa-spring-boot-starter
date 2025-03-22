@@ -119,12 +119,26 @@ public class JpaQueryImpl<E, T> implements JpaQuery<E, T> {
     }
 
     @Override
-    public JpaQuery<E, T> distinct(boolean distinct) {
-        query.distinct(distinct);
+    public JpaQuery<E, T> distinct() {
+        query.distinct(true);
         return this;
     }
 
+    @Override
+    public <X> JpaQuery<X, T> crossJoin(Class<X> joinClass, String alias) {
+        TableAlias.put(joinClass, alias);
+        Root<X> root = query.from(joinClass);
+        RootModel<X> sibling = new RootModel<X>(root, alias, model.getMetamodel());
+        SiblingModel<E, X> siblingModel = new SiblingModel<>(sibling, model);
+        return new JpaQueryImpl<X, T>(siblingModel, query, builder, customQuery);
+    }
 
+    @Override
+    public <X> JpaQuery<X, T> join(Class<X> joinClass, String alias, Filter on) {
+        Model<X> join =
+                model.join(joinClass, alias, on != null ? on.toPredicate(model, builder) : null);
+        return new JpaQueryImpl<X, T>(join, query, builder, customQuery);
+    }
 
     @Override
     public <X> JpaQuery<X, T> join(String attributeName, String alias, Filter on) {
@@ -134,8 +148,22 @@ public class JpaQueryImpl<E, T> implements JpaQuery<E, T> {
     }
 
     @Override
+    public <X> JpaQuery<X, T> leftJoin(Class<X> joinClass, String alias, Filter on) {
+        Model<X> join = model.leftJoin(joinClass, alias,
+                on != null ? on.toPredicate(model, builder) : null);
+        return new JpaQueryImpl<X, T>(join, query, builder, customQuery);
+    }
+
+    @Override
     public <X> JpaQuery<X, T> leftJoin(String attributeName, String alias, Filter on) {
         Model<X> join = model.leftJoin(attributeName, alias,
+                on != null ? on.toPredicate(model, builder) : null);
+        return new JpaQueryImpl<X, T>(join, query, builder, customQuery);
+    }
+
+    @Override
+    public <X> JpaQuery<X, T> rightJoin(Class<X> joinClass, String alias, Filter on) {
+        Model<X> join = model.rightJoin(joinClass, alias,
                 on != null ? on.toPredicate(model, builder) : null);
         return new JpaQueryImpl<X, T>(join, query, builder, customQuery);
     }

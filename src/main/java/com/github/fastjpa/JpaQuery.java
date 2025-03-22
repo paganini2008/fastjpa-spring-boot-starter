@@ -14,10 +14,6 @@ public interface JpaQuery<E, T> {
 
     JpaQuery<E, T> filter(Filter filter);
 
-    default JpaQuery<E, T> orderBy(SerializedFunction<E, ?> sf, boolean asc) {
-        return sort(asc ? JpaSort.asc(sf) : JpaSort.desc(sf));
-    }
-
     JpaQuery<E, T> sort(JpaSort... sorts);
 
     default JpaGroupBy<E, T> groupBy(String... attributeNames) {
@@ -30,6 +26,10 @@ public interface JpaQuery<E, T> {
 
     default JpaGroupBy<E, T> groupBy(Field<?>... fields) {
         return groupBy(new FieldList(fields));
+    }
+
+    default <X> JpaGroupBy<E, T> groupBy(SerializedFunction<X, ?> function) {
+        return groupBy(new FieldList(function));
     }
 
     JpaGroupBy<E, T> groupBy(FieldList fieldList);
@@ -54,32 +54,43 @@ public interface JpaQuery<E, T> {
 
     T one(Column column);
 
-    JpaQuery<E, T> distinct(boolean distinct);
-
-    <X> JpaQuery<X, T> join(String attributeName, String alias, Filter on);
-
-    <X> JpaQuery<X, T> leftJoin(String attributeName, String alias, Filter on);
-
-    <X> JpaQuery<X, T> rightJoin(String attributeName, String alias, Filter on);
-
-    default <X> JpaQuery<X, T> join(SerializedFunction<X, T> sf, String alias, Filter on) {
-        LambdaInfo info = LambdaUtils.inspect(sf);
-        return join(info.getAttributeName(), alias, on);
-    }
-
-    default <X> JpaQuery<X, T> leftJoin(SerializedFunction<X, T> sf, String alias, Filter on) {
-        LambdaInfo info = LambdaUtils.inspect(sf);
-        return leftJoin(info.getAttributeName(), alias, on);
-    }
-
-    default <X> JpaQuery<X, T> rightJoin(SerializedFunction<X, T> sf, String alias, Filter on) {
-        LambdaInfo info = LambdaUtils.inspect(sf);
-        return rightJoin(info.getAttributeName(), alias, on);
-    }
+    JpaQuery<E, T> distinct();
 
     <X> JpaSubQuery<X, X> subQuery(Class<X> entityClass, String alias);
 
     <X, Y> JpaSubQuery<X, Y> subQuery(Class<X> entityClass, String alias, Class<Y> resultClass);
+
+    <X> JpaQuery<X, T> join(Class<X> joinClass, String alias, Filter on);
+
+    <X> JpaQuery<X, T> join(String attributeName, String alias, Filter on);
+
+    <X> JpaQuery<X, T> leftJoin(Class<X> joinClass, String alias, Filter on);
+
+    <X> JpaQuery<X, T> leftJoin(String attributeName, String alias, Filter on);
+
+    <X> JpaQuery<X, T> rightJoin(Class<X> joinClass, String alias, Filter on);
+
+    <X> JpaQuery<X, T> rightJoin(String attributeName, String alias, Filter on);
+
+    <X> JpaQuery<X, T> crossJoin(Class<X> joinClass, String alias);
+
+    default <X> JpaQuery<X, T> join(SerializedFunction<X, ?> sf, String alias, Filter on) {
+        LambdaInfo info = LambdaUtils.inspect(sf);
+        TableAlias.put(info.getAttributeType(), alias);
+        return join(info.getAttributeName(), alias, on);
+    }
+
+    default <X> JpaQuery<X, T> leftJoin(SerializedFunction<X, ?> sf, String alias, Filter on) {
+        LambdaInfo info = LambdaUtils.inspect(sf);
+        TableAlias.put(info.getAttributeType(), alias);
+        return leftJoin(info.getAttributeName(), alias, on);
+    }
+
+    default <X> JpaQuery<X, T> rightJoin(SerializedFunction<X, ?> sf, String alias, Filter on) {
+        LambdaInfo info = LambdaUtils.inspect(sf);
+        TableAlias.put(info.getAttributeType(), alias);
+        return rightJoin(info.getAttributeName(), alias, on);
+    }
 
     CriteriaQuery<T> query();
 

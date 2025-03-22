@@ -110,13 +110,13 @@ public class JpaDaoSupport<E, ID> extends SimpleJpaRepository<E, ID>
                 builder, this);
     }
 
-    public <T> JpaPage<E, Tuple> paginate(Class<E> entityClass, String alias) {
+    public <T> JpaPage<E, Tuple> page(Class<E> entityClass, String alias) {
         JpaQuery<E, Tuple> query = query(entityClass, alias);
         JpaQuery<E, Long> counter = query(entityClass, alias, Long.class);
         return new JpaPageImpl<E, Tuple>(query, counter, this);
     }
 
-    public <T> JpaPage<E, T> paginate(Class<E> entityClass, String alias, Class<T> resultClass) {
+    public <T> JpaPage<E, T> page(Class<E> entityClass, String alias, Class<T> resultClass) {
         JpaQuery<E, T> query = query(entityClass, alias, resultClass);
         JpaQuery<E, Long> counter = query(entityClass, alias, Long.class);
         return new JpaPageImpl<E, T>(query, counter, this);

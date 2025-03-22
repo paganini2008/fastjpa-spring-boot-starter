@@ -37,7 +37,7 @@ public class User {
     @Column(name = "email", nullable = true, length = 255)
     private String email;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REFRESH, orphanRemoval = true)
     private List<Order> orders;
 
     public User(Long id) {

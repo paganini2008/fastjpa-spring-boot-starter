@@ -33,7 +33,6 @@ public class JoinModel<X, Y> implements Model<Y> {
         this.alias = alias;
         this.metamodel = metamodel;
         this.model = model;
-
         TableAlias.put(getType(), alias);
     }
 
@@ -83,6 +82,11 @@ public class JoinModel<X, Y> implements Model<Y> {
     @Override
     public Root<?> getRoot() {
         return model.getRoot();
+    }
+
+    @Override
+    public Metamodel getMetamodel() {
+        return metamodel;
     }
 
     @Override

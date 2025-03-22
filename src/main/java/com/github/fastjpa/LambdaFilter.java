@@ -1,5 +1,8 @@
 package com.github.fastjpa;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Supplier;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
@@ -15,6 +18,16 @@ public class LambdaFilter implements Filter {
 
     public LambdaFilter() {}
 
+    public LambdaFilter(Filter... filters) {
+        this(filters != null ? List.of(filters) : Collections.emptyList());
+    }
+
+    public LambdaFilter(Collection<Filter> filters) {
+        if (filters != null && filters.size() > 0) {
+            filters.forEach(this::join);
+        }
+    }
+
     private LogicalFilter logicalFilter;
     private boolean andOr = true;
 
@@ -24,6 +37,11 @@ public class LambdaFilter implements Filter {
 
     public <X, T> LambdaFilter eq(SerializedFunction<X, T> sf, SubQueryBuilder<T> subQuery) {
         return join(Restrictions.eq(sf, subQuery));
+    }
+
+    public <X, Y> LambdaFilter eq(SerializedFunction<X, ?> leftFun,
+            SerializedFunction<Y, ?> rightFun) {
+        return join(Restrictions.eqProperty(leftFun, rightFun));
     }
 
     public <X> LambdaFilter ne(SerializedFunction<X, ?> sf, Object value) {
