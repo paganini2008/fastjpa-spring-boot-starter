@@ -53,9 +53,11 @@ public class JpaQueryImpl<E, T> implements JpaQuery<E, T> {
 
     @Override
     public <X> JpaSubQuery<X, X> subQuery(Class<X> entityClass, String alias) {
+        TableAlias.put(entityClass, alias);
         Subquery<X> subquery = query.subquery(entityClass);
         Root<X> root = subquery.from(entityClass);
-        Model<X> model = this.model.sibling(Model.forRoot(root, alias));
+        Model<X> model =
+                this.model.sibling(new RootModel<X>(root, alias, this.model.getMetamodel()));
         return new JpaSubQueryImpl<X, X>(model, subquery.select(root), builder);
     }
 
@@ -65,7 +67,8 @@ public class JpaQueryImpl<E, T> implements JpaQuery<E, T> {
         TableAlias.put(entityClass, alias);
         Subquery<Y> subquery = query.subquery(resultClass);
         Root<X> root = subquery.from(entityClass);
-        Model<X> model = this.model.sibling(Model.forRoot(root, alias));
+        Model<X> model =
+                this.model.sibling(new RootModel<X>(root, alias, this.model.getMetamodel()));
         return new JpaSubQueryImpl<X, Y>(model, subquery, builder);
     }
 

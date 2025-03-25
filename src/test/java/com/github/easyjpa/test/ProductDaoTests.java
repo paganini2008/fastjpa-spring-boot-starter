@@ -1,6 +1,7 @@
 package com.github.easyjpa.test;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -65,14 +66,14 @@ public class ProductDaoTests {
     }
 
     @Test
-    public void test0() {
+    public void test1() {
         productDao.query().selectThis().list().forEach(p -> {
             log.info(p.toString());
         });
     }
 
     @Test
-    public void test1() {
+    public void test2() {
         productDao.query(ProductVo.class)
                 .filter(new FilterList().gte(Product::getPrice, BigDecimal.valueOf(100)).and()
                         .notNull(Product::getDiscount))
@@ -84,7 +85,7 @@ public class ProductDaoTests {
     }
 
     @Test
-    public void test2() {
+    public void test3() {
         productDao.query(ProductVo.class)
                 .filter(new FilterList().gte(Product::getPrice, BigDecimal.valueOf(200))
                         .and(() -> new FilterList().eq(Product::getLocation, "Australia").or()
@@ -99,7 +100,7 @@ public class ProductDaoTests {
     }
 
     @Test
-    public void test3() {
+    public void test4() {
         productDao.customQuery().groupBy(Product::getLocation)
                 .sort(JpaSort.desc(Fields.avg(Product::getPrice)))
                 .select(new ColumnList(Product::getLocation).addColumns(
@@ -113,7 +114,7 @@ public class ProductDaoTests {
     }
 
     @Test
-    public void test4() {
+    public void test5() {
         productDao.customQuery().groupBy(new FieldList(Product::getLocation))
                 .having(Restrictions.gt(Fields.avg(Product::getPrice), 50d)).sort(JpaSort.desc(4))
                 .select(new ColumnList(Product::getLocation).addColumns(
@@ -127,7 +128,7 @@ public class ProductDaoTests {
     }
 
     @Test
-    public void test5() {
+    public void test6() {
         ColumnList columnList = new ColumnList();
         columnList
                 .addColumns(Fields.concat(Fields.concat(Fields.max("price", String.class), "/"),
@@ -141,7 +142,7 @@ public class ProductDaoTests {
     }
 
     @Test
-    public void test6() {
+    public void test7() {
         ColumnList columnList = new ColumnList().addColumns(
                 Function.build("LOWER", String.class, Product::getName).as("name"),
                 Function.build("UPPER", String.class, Product::getLocation).as("location"));
@@ -151,7 +152,7 @@ public class ProductDaoTests {
     }
 
     @Test
-    public void test7() {
+    public void test8() {
         IfExpression<String, String> ifExpression =
                 new IfExpression<String, String>(Product::getLocation).when("Indonesia", "Asia")
                         .when("Japan", "Asia").when("China", "Asia").when("Singapore", "Asia")
@@ -166,7 +167,7 @@ public class ProductDaoTests {
     }
 
     @Test
-    public void test8() {
+    public void test9() {
         productDao.customPage().crossJoin(Stock.class, "a")
                 .filter(new FilterList().eq(Stock::getProductId, Product::getId))
                 .select(new ColumnList().addColumns(Product::getId, Product::getName)
@@ -185,11 +186,24 @@ public class ProductDaoTests {
 
     @ParameterizedTest
     @ValueSource(strings = {"Australia", "New Zealand"})
-    public void test9(String location) {
+    public void test10(String location) {
         JpaSubQuery<Product, Long> subQuery = stockDao.update().subQuery(Product.class, Long.class)
                 .filter(Restrictions.eq(Product::getLocation, location)).select(Product::getId);
-        stockDao.update().setField(Stock::getAmount, Fields.plusValue(Stock::getAmount, 1000))
+        int rows = stockDao.update()
+                .setField(Stock::getAmount, Fields.plusValue(Stock::getAmount, 1000))
                 .filter(Restrictions.in(Stock::getProductId, subQuery)).execute();
+        log.info("Affected rows: {}", rows);
+    }
+
+    @Test
+    public void test11() {
+        Long productId = stockDao.query(Long.class).sort(JpaSort.desc(Stock::getAmount))
+                .select(new ColumnList(Stock::getProductId)).first();
+        int rows = productDao.update()
+                .set(Product::getPrice, BigDecimal.valueOf(1000), Product::getDiscount,
+                        BigDecimal.valueOf(0.8f), Product::getProduceDate, LocalDate.now())
+                .filter(Restrictions.eq(Product::getId, productId)).execute();
+        log.info("Affected rows: {}", rows);
     }
 
     @AfterAll

@@ -40,6 +40,18 @@ public class JpaPageImpl<E, T> implements JpaPage<E, T> {
         return new JpaPageGroupByImpl<E, T>(groupQuery, counterQuery, customQuery);
     }
 
+
+    @Override
+    public <X> JpaSubQuery<X, X> subQuery(Class<X> entityClass, String alias) {
+        return query.subQuery(entityClass, alias);
+    }
+
+    @Override
+    public <X, Y> JpaSubQuery<X, Y> subQuery(Class<X> entityClass, String alias,
+            Class<Y> resultClass) {
+        return query.subQuery(entityClass, alias, resultClass);
+    }
+
     @Override
     public JpaPageResultSet<T> selectThis() {
         query.selectThis();

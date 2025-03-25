@@ -16,6 +16,10 @@ public interface JpaPage<E, T> {
 
     JpaPage<E, T> sort(JpaSort... sorts);
 
+    <X> JpaSubQuery<X, X> subQuery(Class<X> entityClass, String alias);
+
+    <X, Y> JpaSubQuery<X, Y> subQuery(Class<X> entityClass, String alias, Class<Y> resultClass);
+
     JpaPageResultSet<T> selectThis();
 
     JpaPageResultSet<T> selectAlias(String... tableAliases);
@@ -34,7 +38,7 @@ public interface JpaPage<E, T> {
         return groupBy(new FieldList(fields));
     }
 
-    default JpaPageGroupBy<E, T> groupBy(SerializedFunction<E, ?> function) {
+    default <X> JpaPageGroupBy<E, T> groupBy(SerializedFunction<X, ?> function) {
         return groupBy(new FieldList(function));
     }
 

@@ -28,9 +28,12 @@ import com.github.easyjpa.page.PageRequest;
 import com.github.easyjpa.test.config.JpaConfig;
 import com.github.easyjpa.test.dao.OrderDao;
 import com.github.easyjpa.test.dao.OrderProductDao;
+import com.github.easyjpa.test.dao.ProductDao;
+import com.github.easyjpa.test.dao.UserDao;
 import com.github.easyjpa.test.entity.Order;
 import com.github.easyjpa.test.entity.OrderProduct;
 import com.github.easyjpa.test.entity.Product;
+import com.github.easyjpa.test.entity.Stock;
 import com.github.easyjpa.test.entity.User;
 import com.github.easyjpa.test.service.ProductService;
 import com.github.easyjpa.test.service.UserOrderService;
@@ -67,6 +70,12 @@ public class OrderDaoTests {
 
     @Autowired
     private OrderProductDao orderProductDao;
+
+    @Autowired
+    private UserDao userDao;
+
+    @Autowired
+    private ProductDao productDao;
 
     @BeforeAll
     public void begin() {
@@ -183,12 +192,47 @@ public class OrderDaoTests {
                 });
     }
 
+    @Test
+    public void test7() {
+        userDao.customPage().leftJoin(User::getOrders, "o", null)
+                .join(Order::getOrderProducts, "op", null).join(OrderProduct::getProduct, "p", null)
+                .filter(Restrictions.notNull(Product::getDiscount)
+                        .and(Restrictions.in(Product::getId,
+                                productDao.query().subQuery(Stock.class, "s", Long.class)
+                                        .filter(Restrictions.gt(Stock::getAmount, 100L))
+                                        .select(Stock::getProductId))))
+                .groupBy(new FieldList(Product::getName, Product::getLocation))
+                .sort(JpaSort.desc(4), JpaSort.desc(5))
+                .select(new ColumnList().addColumns(Product::getName, Product::getLocation)
+                        .addColumns(Fields.count(Product::getId).as("productAmount"),
+                                Fields.count(Order::getId).as("orderAmount"),
+                                Fields.sum(OrderProduct::getAmount).as("totalAmount"), Fields
+                                        .abs(Fields.minus(
+                                                Fields.multiply(
+                                                        Fields.multiply(Product::getPrice,
+                                                                Product::getDiscount),
+                                                        Fields.sum(OrderProduct::getAmount)),
+                                                Fields.multiply(Product::getPrice,
+                                                        Fields.sum(OrderProduct::getAmount))))
+                                        .as("savings")))
+                .setTransformer(Transformers.asMap()).paginate(PageRequest.of(10))
+                .forEachPage(eachPage -> {
+                    log.info(String.format(
+                            "====================== PageNumber/TotalPage: %s/%s  Total Records: %s ======================",
+                            eachPage.getPageNumber(), eachPage.getTotalPages(),
+                            eachPage.getTotalRecords()));
+                    eachPage.getContent().forEach(vo -> {
+                        log.info(vo.toString());
+                    });
+                });
+    }
+
     @ParameterizedTest
     @CsvSource({"'Flashlight,Iron'"})
-    public void test7(String str) {
+    public void test8(String str) {
         String[] itemNames = str.split(",");
         JpaSubQuery<OrderProduct, Order> subQuery =
-                orderDao.query().subQuery(OrderProduct.class, "o", Order.class)
+                orderDao.query().subQuery(OrderProduct.class, "op", Order.class)
                         .join(OrderProduct::getProduct, "p", null)
                         .filter(new FilterList().eq(Product::getId, OrderProduct::getProduct)
                                 .in(Product::getName, List.of(itemNames)))

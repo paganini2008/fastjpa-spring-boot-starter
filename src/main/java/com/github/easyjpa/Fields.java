@@ -143,6 +143,11 @@ public abstract class Fields {
         return plus(Property.forName(leftFunction), Property.forName(rightFunction));
     }
 
+    public static <E, T extends Number> Field<T> plus(SerializedFunction<E, T> leftFunction,
+            Field<T> rightField) {
+        return plus(Property.forName(leftFunction), rightField);
+    }
+
     public static <T extends Number> Field<T> plus(Field<T> leftField, Field<T> rightField) {
         return new Field<T>() {
 
@@ -180,6 +185,11 @@ public abstract class Fields {
     public static <E, T extends Number> Field<T> minus(SerializedFunction<E, T> leftfFunction,
             SerializedFunction<E, T> rightFunction) {
         return minus(Property.forName(leftfFunction), Property.forName(rightFunction));
+    }
+
+    public static <E, T extends Number> Field<T> minus(SerializedFunction<E, T> leftFunction,
+            Field<T> rightField) {
+        return minus(Property.forName(leftFunction), rightField);
     }
 
     public static <T extends Number> Field<T> minus(Field<T> leftField, Field<T> rightField) {
@@ -221,6 +231,11 @@ public abstract class Fields {
         return multiply(Property.forName(leftFunction), Property.forName(rightfFunction));
     }
 
+    public static <E, T extends Number> Field<T> multiply(SerializedFunction<E, T> leftFunction,
+            Field<T> rightField) {
+        return multiply(Property.forName(leftFunction), rightField);
+    }
+
     public static <T extends Number> Field<T> multiply(Field<T> leftField, Field<T> rightField) {
         return new Field<T>() {
 
@@ -258,6 +273,12 @@ public abstract class Fields {
     public static <E, T extends Number> Field<Number> divide(
             SerializedFunction<E, T> leftExpression, SerializedFunction<E, T> rightField) {
         return divide(Property.forName(leftExpression), Property.forName(rightField));
+    }
+
+
+    public static <E, T extends Number> Field<Number> divide(SerializedFunction<E, T> leftFunction,
+            Field<T> rightField) {
+        return divide(Property.forName(leftFunction), rightField);
     }
 
     public static <T extends Number> Field<Number> divide(Field<T> leftField, Field<T> rightField) {

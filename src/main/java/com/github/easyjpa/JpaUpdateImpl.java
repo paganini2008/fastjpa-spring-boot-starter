@@ -39,8 +39,21 @@ public class JpaUpdateImpl<E> implements JpaUpdate<E> {
 
     @Override
     public <T> JpaUpdate<E> set(String attributeName, T value) {
-        Path<T> path = model.getAttribute(attributeName);
-        update.set(path, value);
+        update.set(model.getAttribute(attributeName), value);
+        return this;
+    }
+
+    @Override
+    public <T> JpaUpdate<E> set(String attributeName1, T value1, String attributeName2, T value2) {
+        update.set(model.getAttribute(attributeName1), value1).set(attributeName2, value2);
+        return this;
+    }
+
+    @Override
+    public <T> JpaUpdate<E> set(String attributeName1, T value1, String attributeName2, T value2,
+            String attributeName3, T value3) {
+        update.set(model.getAttribute(attributeName1), value1).set(attributeName2, value2)
+                .set(attributeName3, value3);
         return this;
     }
 

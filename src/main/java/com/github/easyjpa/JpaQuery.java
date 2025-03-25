@@ -40,6 +40,10 @@ public interface JpaQuery<E, T> {
 
     JpaQueryResultSet<T> select(ColumnList columnList);
 
+    default T one(SerializedFunction<E, T> function) {
+        return one(Property.forName(function));
+    }
+
     default T one(String attributeName) {
         return one(Column.forName(attributeName));
     }

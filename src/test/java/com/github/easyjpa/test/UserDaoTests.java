@@ -15,8 +15,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import com.github.easyjpa.ColumnList;
 import com.github.easyjpa.FilterList;
+import com.github.easyjpa.JpaSubQuery;
+import com.github.easyjpa.Restrictions;
 import com.github.easyjpa.test.config.JpaConfig;
 import com.github.easyjpa.test.dao.UserDao;
+import com.github.easyjpa.test.entity.Order;
 import com.github.easyjpa.test.entity.User;
 import com.github.easyjpa.test.service.UserService;
 
@@ -80,6 +83,14 @@ public class UserDaoTests {
                 .first();
         log.info("Load user: {}", user);
         assertTrue(user == null);
+    }
+
+    @Test
+    public void testDeleteUserWithoutOrder() {
+        JpaSubQuery<Order, Order> subQuery = userDao.delete().subQuery(Order.class)
+                .filter(Restrictions.eq(Order::getUser, User::getId));
+        int rows = userDao.delete().filter(Restrictions.exists(subQuery).not()).execute();
+        log.info("Affected rows: {}", rows);
     }
 
     @AfterAll
