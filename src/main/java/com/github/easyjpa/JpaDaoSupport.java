@@ -74,18 +74,26 @@ public class JpaDaoSupport<E, ID> extends SimpleJpaRepository<E, ID>
 
     @Override
     public int executeUpdate(JpaDeleteCallback<E> callback) {
-        CriteriaBuilder builder = em.getCriteriaBuilder();
-        CriteriaDelete<E> delete = callback.doInJpa(builder);
-        Query query = em.createQuery(delete);
-        return query.executeUpdate();
+        try {
+            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaDelete<E> delete = callback.doInJpa(builder);
+            Query query = em.createQuery(delete);
+            return query.executeUpdate();
+        } finally {
+            TableAlias.clear();
+        }
     }
 
     @Override
     public int executeUpdate(JpaUpdateCallback<E> callback) {
-        CriteriaBuilder builder = em.getCriteriaBuilder();
-        CriteriaUpdate<E> update = callback.doInJpa(builder);
-        Query query = em.createQuery(update);
-        return query.executeUpdate();
+        try {
+            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaUpdate<E> update = callback.doInJpa(builder);
+            Query query = em.createQuery(update);
+            return query.executeUpdate();
+        } finally {
+            TableAlias.clear();
+        }
     }
 
     @Override

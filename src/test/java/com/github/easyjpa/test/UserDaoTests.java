@@ -31,7 +31,7 @@ import com.github.easyjpa.test.service.UserService;
  * @Version 1.0.0
  */
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@DataJpaTest(showSql = true)
+@DataJpaTest(showSql = false)
 @ContextConfiguration(classes = {JpaConfig.class, UserService.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserDaoTests {

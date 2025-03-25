@@ -12,7 +12,7 @@
 
 **EasyJPA** elegantly streamlines JPA's Criteria API with a fully **Lambda-expression-based** and developer-friendly API, making dynamic queries both intuitive and efficient. It significantly reduces SQL/JPQL complexity, accelerates development, and improves code readability, ensuring a clean and concise query experience.
 
-With comprehensive support for complex SQL queries, **EasyJPA** enables seamless execution of **multi-table joins (INNER, LEFT, RIGHT, CROSS JOINs), subqueries, aggregations, computed columns, and filtering operations**. Its **fluent API with full Lambda expression support** allows developers to construct queries programmatically, eliminating the need for raw SQL while retaining maximum flexibility.
+With comprehensive support for **complex SQL queries**, **EasyJPA** enables seamless execution of **multi-table joins (INNER, LEFT, RIGHT, CROSS JOINs), subqueries, aggregations, computed columns, and filtering operations**. Its **fluent API with full Lambda expression support** allows developers to construct queries programmatically, eliminating the need for raw SQL while retaining maximum flexibility.
 
 ## Features
 ---------------------------
@@ -128,7 +128,8 @@ public void testGetUserByEmail(String email) {
 Hibernate: 
     select
         u1_0.username,
-        u1_0.password 
+        u1_0.password,
+        u1_0.email 
     from
         example_user u1_0 
     where
@@ -514,6 +515,107 @@ public void test5() {
                  });
              });
 }
+
+/**
+Hibernate: 
+    select
+        count(1) 
+    from
+        example_user u1_0 
+    left join
+        example_order o1_0 
+            on u1_0.id=o1_0.user_id 
+    join
+        example_order_product op1_0 
+            on o1_0.id=op1_0.order_id 
+    join
+        example_product p1_0 
+            on p1_0.id=op1_0.product_id 
+    where
+        p1_0.discount is not null 
+        and p1_0.id in ((select
+            s1_0.product_id 
+        from
+            example_stock s1_0 
+        where
+            s1_0.amount>?)) 
+    group by
+        p1_0.name,
+        p1_0.location
+Hibernate: 
+    select
+        p1_0.name,
+        p1_0.location,
+        count(p1_0.id),
+        count(o1_0.id),
+        sum(op1_0.amount),
+        abs((((p1_0.price*p1_0.discount)*sum(op1_0.amount))-(p1_0.price*sum(op1_0.amount)))) 
+    from
+        example_user u1_0 
+    left join
+        example_order o1_0 
+            on u1_0.id=o1_0.user_id 
+    join
+        example_order_product op1_0 
+            on o1_0.id=op1_0.order_id 
+    join
+        example_product p1_0 
+            on p1_0.id=op1_0.product_id 
+    where
+        p1_0.discount is not null 
+        and p1_0.id in ((select
+            s1_0.product_id 
+        from
+            example_stock s1_0 
+        where
+            s1_0.amount>?)) 
+    group by
+        p1_0.name,
+        p1_0.location 
+    order by
+        4 desc,
+        5 desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+**/
+@Test
+public void test7() {
+    userDao.customPage().leftJoin(User::getOrders, "o", null)
+                        .join(Order::getOrderProducts, "op", null)
+                        .join(OrderProduct::getProduct, "p", null)
+                        .filter(Restrictions.notNull(Product::getDiscount)
+                        .and(Restrictions.in(Product::getId,
+                                productDao.query().subQuery(Stock.class, "s", Long.class)
+                                        .filter(Restrictions.gt(Stock::getAmount, 100L))
+                                        .select(Stock::getProductId))))
+                        .groupBy(new FieldList(Product::getName, Product::getLocation))
+                        .sort(JpaSort.desc(4), JpaSort.desc(5))
+                        .select(new ColumnList()
+                                    .addColumns(Product::getName, Product::getLocation)
+                                    .addColumns(Fields.count(Product::getId).as("productAmount"),
+                                                  Fields.count(Order::getId).as("orderAmount"),
+                                         Fields.sum(OrderProduct::getAmount).as("totalAmount"), 
+                                         Fields.abs(Fields.minus(
+                                                Fields.multiply(
+                                                        Fields.multiply(Product::getPrice,
+                                                                Product::getDiscount),
+                                                        Fields.sum(OrderProduct::getAmount)),
+                                                Fields.multiply(Product::getPrice,
+                                                        Fields.sum(OrderProduct::getAmount))))
+                                        .as("savings")))
+                        .setTransformer(Transformers.asMap()).paginate(PageRequest.of(10))
+                        .forEachPage(eachPage -> {
+                                     log.info(String.format(
+           "====================== PageNumber/TotalPage: %s/%s  Total Records: %s ======================",
+                                     eachPage.getPageNumber(), eachPage.getTotalPages(),
+                                     eachPage.getTotalRecords()));
+                                     eachPage.getContent().forEach(vo -> {
+                                         log.info(vo.toString());
+                                     });
+                         });
+    }
 ```
 
 **8. Right Join & Pagination**
@@ -752,6 +854,41 @@ public void test9(String location) {
             .filter(Restrictions.in(Stock::getProductId, subQuery))
             .execute();
 }
+
+/**
+Hibernate: 
+    select
+        s1_0.product_id 
+    from
+        example_stock s1_0 
+    order by
+        s1_0.amount desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+Hibernate: 
+    update
+        example_product p1_0 
+    set
+        price=?,
+        discount=?,
+        produce_date=? 
+    where
+        p1_0.id=?
+**/
+@Test
+public void test11() {
+     Long productId = stockDao.query(Long.class)
+                              .sort(JpaSort.desc(Stock::getAmount))
+                              .select(new ColumnList(Stock::getProductId))
+                              .first();
+     int rows = productDao.update().set(Product::getPrice, BigDecimal.valueOf(1000), 
+                                        Product::getDiscount,BigDecimal.valueOf(0.8f),                                                               Product::getProduceDate, LocalDate.now())
+                                   .filter(Restrictions.eq(Product::getId, productId))
+                                   .execute();
+     log.info("Affected rows: {}", rows);
+}
 ```
 
 **12. Delete with Subquery**
@@ -786,6 +923,28 @@ public void test7(String str) {
                                 .in(Product::getName, List.of(itemNames)))
                         .select(OrderProduct::getOrder);
      int rows = orderDao.delete().filter(Restrictions.exists(subQuery)).execute();
+     log.info("Affected rows: {}", rows);
+}
+
+/**
+Hibernate: 
+    delete 
+    from
+        example_user u1_0 
+    where
+        not exists(select
+            o1_0.id 
+        from
+            example_order o1_0 
+        where
+            o1_0.user_id=o1_0.id)
+**/
+@Test
+public void testDeleteUserWithoutOrder() {
+     JpaSubQuery<Order, Order> subQuery = userDao.delete()
+                                                 .subQuery(Order.class)
+                                                 .filter(Restrictions.eq(Order::getUser, User::getId));
+     int rows = userDao.delete().filter(Restrictions.exists(subQuery).not()).execute();
      log.info("Affected rows: {}", rows);
 }
 ```
@@ -841,27 +1000,17 @@ public class Order {
 
 * DAO (Repository) Definition
 
-
-##### UserDao
 ``` java
 public interface UserDao extends EntityDao<User, Long> {
 
 }
-```
-##### OrderDao
-``` java
 public interface OrderDao extends EntityDao<Order, Long> {
 
 }
-```
-##### ProductDao
-``` java
 public interface ProductDao extends EntityDao<Product, Long> {
 
 }
 ```
-
-
 
 ## Contribution and License
 

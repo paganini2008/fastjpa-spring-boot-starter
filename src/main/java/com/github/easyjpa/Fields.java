@@ -870,6 +870,25 @@ public abstract class Fields {
 
     }
 
+    public static <X, T extends Number> Field<Integer> sign(SerializedFunction<X, T> function) {
+        return sign(Property.forName(function));
+    }
+
+    public static <T extends Number> Field<Integer> sign(Field<T> field) {
+        return new Field<Integer>() {
+
+            public Expression<Integer> toExpression(Model<?> model, CriteriaBuilder builder) {
+                Expression<T> expression = field.toExpression(model, builder);
+                return builder.sign(expression);
+            }
+
+            public String toString() {
+                return "sign(" + field.toString() + ")";
+            }
+        };
+
+    }
+
     public static <X, T extends Number> Field<T> floor(SerializedFunction<X, T> function) {
         return floor(Property.forName(function));
     }
