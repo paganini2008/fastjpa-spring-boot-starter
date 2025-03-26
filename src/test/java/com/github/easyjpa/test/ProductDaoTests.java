@@ -47,7 +47,7 @@ import lombok.ToString;
  * @Version 1.0.0
  */
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@DataJpaTest(showSql = true)
+@DataJpaTest(showSql = false)
 @ContextConfiguration(classes = {JpaConfig.class, ProductService.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ProductDaoTests {
